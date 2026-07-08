@@ -29,6 +29,80 @@ import {
 } from 'lucide-react';
 import { STADIUM_CONFIGS } from './data/stadiums';
 
+// Dynamic Stadium Outline and Playing Field visual elements based on sport & venue
+const renderStadiumMapElements = (stadiumId, isFanView = false) => {
+  const pitchColor = isFanView ? "rgba(10, 61, 46, 0.85)" : "rgba(4, 120, 87, 0.85)";
+  const strokeColor = isFanView ? "rgba(255, 255, 255, 0.2)" : "rgba(255, 255, 255, 0.4)";
+  const strokeWidth = isFanView ? 1.5 : 2;
+
+  switch (stadiumId) {
+    case 'narendra_modi':
+      // Circular cricket stadium with custom boundaries & pitch strip
+      return (
+        <g id="modi-stadium-layout">
+          {/* Outer Stadium Rim: Circular */}
+          <circle cx="200" cy="150" r="135" 
+            fill={isFanView ? "rgba(11, 15, 25, 0.75)" : "rgba(22, 29, 48, 0.55)"} 
+            stroke={isFanView ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)"} 
+            strokeWidth="4" 
+          />
+          
+          {/* Cricket Ground Circular Boundary */}
+          <circle cx="200" cy="150" r="90" fill={pitchColor} stroke={strokeColor} strokeWidth={strokeWidth} />
+          
+          {/* Inner 30-Yard Circle (Dashed) */}
+          <circle cx="200" cy="150" r="60" fill="none" stroke={strokeColor} strokeWidth={strokeWidth - 0.5} strokeDasharray="4 4" opacity="0.6" />
+          
+          {/* Central Pitch Strip */}
+          <rect x="193" y="132" width="14" height="36" fill="#eab308" stroke="rgba(0,0,0,0.2)" strokeWidth="1" opacity="0.85" rx="1" />
+          <line x1="193" y1="138" x2="207" y2="138" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
+          <line x1="193" y1="162" x2="207" y2="162" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
+        </g>
+      );
+    case 'wembley':
+      // Soccer field with the iconic sweeping Wembley Arch!
+      return (
+        <g id="wembley-stadium-layout">
+          {/* Outer Stadium Rim: Oval */}
+          <path d="M200 15 C320 15, 385 65, 385 150 C385 235, 320 285, 200 285 C80 285, 15 235, 15 150 C15 65, 80 15, 200 15 Z" 
+            fill={isFanView ? "rgba(11, 15, 25, 0.75)" : "rgba(22, 29, 48, 0.55)"} 
+            stroke={isFanView ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)"} 
+            strokeWidth="4" 
+          />
+          
+          {/* Soccer Pitch */}
+          <rect x="140" y="110" width="120" height="80" rx="4" fill={pitchColor} stroke={strokeColor} strokeWidth={strokeWidth} />
+          <line x1="200" y1="110" x2="200" y2="190" stroke={strokeColor} strokeWidth={strokeWidth} />
+          <circle cx="200" cy="150" r="20" stroke={strokeColor} strokeWidth={strokeWidth} fill="none" />
+          
+          {/* Iconic Wembley Arch (Sweeping Neon blue-glow curve across the top) */}
+          <path d="M40 150 A 175 140 0 0 1 360 150" fill="none" stroke="rgba(59, 130, 246, 0.15)" strokeWidth="6" strokeLinecap="round" />
+          <path d="M40 150 A 175 140 0 0 1 360 150" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeDasharray="3 4">
+            <animate attributeName="stroke-dashoffset" values="0;20" dur="2s" repeatCount="indefinite" />
+          </path>
+        </g>
+      );
+    case 'metlife':
+    default:
+      // Standard MetLife Oval Soccer Field
+      return (
+        <g id="metlife-stadium-layout">
+          {/* Outer Stadium Rim */}
+          <path d="M200 15 C320 15, 385 65, 385 150 C385 235, 320 285, 200 285 C80 285, 15 235, 15 150 C15 65, 80 15, 200 15 Z" 
+            fill={isFanView ? "rgba(11, 15, 25, 0.75)" : "rgba(22, 29, 48, 0.55)"} 
+            stroke={isFanView ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)"} 
+            strokeWidth="4" 
+          />
+          
+          {/* Soccer Pitch */}
+          <rect x="140" y="110" width="120" height="80" rx="4" fill={pitchColor} stroke={strokeColor} strokeWidth={strokeWidth} />
+          <line x1="200" y1="110" x2="200" y2="190" stroke={strokeColor} strokeWidth={strokeWidth} />
+          <circle cx="200" cy="150" r="20" stroke={strokeColor} strokeWidth={strokeWidth} fill="none" />
+        </g>
+      );
+  }
+};
+
 function App() {
   const [activeTab, setActiveTab] = useState('operations');
   const [geminiApiKey, setGeminiApiKey] = useState('');
@@ -660,14 +734,9 @@ function App() {
 
                 <div className="map-visualizer">
                   <svg className="stadium-svg" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Outer Stadium Rim */}
-                    <path d="M200 15 C320 15, 385 65, 385 150 C385 235, 320 285, 200 285 C80 285, 15 235, 15 150 C15 65, 80 15, 200 15 Z" fill="rgba(22, 29, 48, 0.4)" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+                    {/* Dynamic Stadium Background & Playing Field */}
+                    {renderStadiumMapElements(currentStadiumId, false)}
                     
-                    {/* Pitch */}
-                    <rect x="140" y="110" width="120" height="80" rx="4" fill="#047857" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-                    <line x1="200" y1="110" x2="200" y2="190" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-                    <circle cx="200" cy="150" r="20" stroke="rgba(255,255,255,0.4)" strokeWidth="2" fill="none" />
-
                     {/* North Stand Sector */}
                     <path 
                       className={`stadium-sector ${selectedSector === 'North Stand' ? 'sector-selected' : ''} ${simulatedSectorData['North Stand'].colorClass}`}
@@ -870,14 +939,8 @@ function App() {
               {/* SVG Map with animated route overlay */}
               <div className="map-visualizer" style={{ position: 'relative' }}>
                 <svg className="stadium-svg" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Stadium background — same shape as operations map */}
-                  <path d="M200 15 C320 15, 385 65, 385 150 C385 235, 320 285, 200 285 C80 285, 15 235, 15 150 C15 65, 80 15, 200 15 Z"
-                    fill="rgba(11,15,25,0.7)" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
-
-                  {/* Pitch */}
-                  <rect x="140" y="110" width="120" height="80" rx="4" fill="#0a3d2e" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
-                  <line x1="200" y1="110" x2="200" y2="190" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
-                  <circle cx="200" cy="150" r="20" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" fill="none" />
+                  {/* Dynamic Stadium Background & Playing Field */}
+                  {renderStadiumMapElements(currentStadiumId, true)}
 
                   {/* Dim sector fills */}
                   {activeStadium.sectors.map((s, i) => {
