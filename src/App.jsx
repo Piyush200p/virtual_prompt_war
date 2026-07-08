@@ -117,6 +117,16 @@ function App() {
     sectorData[s.name] = s;
   });
 
+  // Header Dropdown Search/Filter State
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('All');
+
+  // Ticket Scanner State
+  const [scannedTicketCode, setScannedTicketCode] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanFeedback, setScanFeedback] = useState(null);
+
   // Operations State
   const [selectedSector, setSelectedSector] = useState('East Stand');
   const [incidents, setIncidents] = useState([
@@ -492,6 +502,48 @@ function App() {
     }, 3000);
   };
 
+  const handleScanTicket = (codeToScan = null) => {
+    const code = codeToScan || scannedTicketCode;
+    if (!code.trim()) return;
+
+    setIsScanning(true);
+    setScanFeedback(null);
+
+    setTimeout(() => {
+      const upperCode = code.toUpperCase();
+      let matchedId = null;
+      let matchedName = "";
+
+      if (upperCode.includes("FIFA") || upperCode.includes("ARGFRA") || upperCode.includes("METLIFE")) {
+        matchedId = "metlife";
+        matchedName = "MetLife Stadium (USA)";
+      } else if (upperCode.includes("CRIC") || upperCode.includes("IND") || upperCode.includes("MODI")) {
+        matchedId = "narendra_modi";
+        matchedName = "Narendra Modi Stadium (India)";
+      } else if (upperCode.includes("WEMB") || upperCode.includes("CHEARS") || upperCode.includes("WEMBLEY")) {
+        matchedId = "wembley";
+        matchedName = "Wembley Stadium (UK)";
+      }
+
+      setIsScanning(false);
+
+      if (matchedId) {
+        setCurrentStadiumId(matchedId);
+        setSelectedSector(matchedId === 'narendra_modi' ? 'North Stand' : 'East Stand');
+        setCurrentRouteStep(0); // Reset wayfinding to step 0 on scan
+        setScanFeedback({
+          type: 'success',
+          message: `🎟️ Ticket scanned successfully! Active context updated to ${matchedName}. Seat location and route guide unlocked.`
+        });
+      } else {
+        setScanFeedback({
+          type: 'error',
+          message: "❌ Unrecognized ticket barcode. Please check your credentials or tap a demo ticket preset."
+        });
+      }
+    }, 1200);
+  };
+
   return (
     <div id="root">
       {/* App Header */}
@@ -499,29 +551,126 @@ function App() {
         <div className="brand">
           <Activity className="brand-icon" size={28} />
           <h1 className="brand-title">ArenaFlow AI</h1>
-          <select 
-            value={currentStadiumId} 
-            onChange={(e) => {
-              setCurrentStadiumId(e.target.value);
-              setSelectedSector(e.target.value === 'narendra_modi' ? 'North Stand' : 'East Stand');
-            }}
-            style={{
-              background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-color)',
-              color: '#fff',
-              borderRadius: '8px',
-              padding: '0.4rem 0.8rem',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              outline: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-            }}
-          >
-            <option value="metlife">⚽ MetLife Stadium</option>
-            <option value="narendra_modi">🏏 Narendra Modi</option>
-            <option value="wembley">⚽ Wembley Stadium</option>
-          </select>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              style={{
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-color)',
+                color: '#fff',
+                borderRadius: '8px',
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                outline: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <span>{activeStadium.id === 'narendra_modi' ? '🏏' : '⚽'} {activeStadium.name}</span>
+              <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>▼</span>
+            </button>
+
+            {isSearchOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '110%',
+                left: 0,
+                width: '320px',
+                background: 'rgba(15, 23, 42, 0.98)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+                zIndex: 1000,
+                padding: '0.75rem',
+                backdropFilter: 'blur(20px)'
+              }}>
+                {/* Search Input */}
+                <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', padding: '0.35rem 0.5rem', marginBottom: '0.5rem', border: '1px solid var(--border-color)' }}>
+                  <span style={{ fontSize: '0.8rem', marginRight: '0.4rem', opacity: 0.5 }}>🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search by name, location, sport..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ background: 'none', border: 'none', outline: 'none', color: '#fff', fontSize: '0.78rem', width: '100%' }}
+                  />
+                </div>
+
+                {/* Filter Pills */}
+                <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                  {['All', 'North America', 'Europe', 'South Asia'].map(reg => (
+                    <button
+                      key={reg}
+                      onClick={() => setSelectedRegion(reg)}
+                      style={{
+                        background: selectedRegion === reg ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.02)',
+                        border: `1px solid ${selectedRegion === reg ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                        color: selectedRegion === reg ? '#fff' : 'var(--text-secondary)',
+                        fontSize: '0.65rem',
+                        fontWeight: '600',
+                        borderRadius: '4px',
+                        padding: '0.2rem 0.4rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {reg}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Stadium List */}
+                <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  {Object.values(STADIUM_CONFIGS)
+                    .filter(s => {
+                      const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                            s.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                            s.sport.toLowerCase().includes(searchQuery.toLowerCase());
+                      const matchesRegion = selectedRegion === 'All' || s.region === selectedRegion;
+                      return matchesSearch && matchesRegion;
+                    })
+                    .map(stadium => (
+                      <div
+                        key={stadium.id}
+                        onClick={() => {
+                          setCurrentStadiumId(stadium.id);
+                          setSelectedSector(stadium.id === 'narendra_modi' ? 'North Stand' : 'East Stand');
+                          setIsSearchOpen(false);
+                        }}
+                        style={{
+                          padding: '0.5rem',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          background: currentStadiumId === stadium.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                          border: `1px solid ${currentStadiumId === stadium.id ? 'rgba(59, 130, 246, 0.2)' : 'transparent'}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (currentStadiumId !== stadium.id) {
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = currentStadiumId === stadium.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent';
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: '0.78rem', fontWeight: '600', color: '#fff' }}>{stadium.id === 'narendra_modi' ? '🏏' : '⚽'} {stadium.name}</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{stadium.location}, {stadium.country}</div>
+                        </div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--color-primary)', fontWeight: '600' }}>{stadium.sport.split(' ')[0]}</div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Global Stats Ticker */}
@@ -1074,32 +1223,60 @@ function App() {
                 {/* Digital Ticket */}
                 <div className="fan-ticket-card">
                   <div className="ticket-header">
-                    <span className="ticket-title">{ticketInfo.venue}</span>
+                    <span className="ticket-title">{activeStadium.name}</span>
                     <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 700 }}>ACTIVE</span>
                   </div>
                   <div className="ticket-matchup">
-                    <span className="team-abbr">ARG</span>
+                    <span className="team-abbr">
+                      {(() => {
+                        const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
+                        const team1 = parts[0] || 'HOME';
+                        if (team1.toLowerCase().includes('argentina')) return 'ARG';
+                        if (team1.toLowerCase().includes('india')) return 'IND';
+                        if (team1.toLowerCase().includes('chelsea')) return 'CHE';
+                        return team1.substring(0, 3).toUpperCase();
+                      })()}
+                    </span>
                     <span className="match-vs">VS</span>
-                    <span className="team-abbr">FRA</span>
+                    <span className="team-abbr">
+                      {(() => {
+                        const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
+                        const team2 = parts[1] || 'AWAY';
+                        if (team2.toLowerCase().includes('france')) return 'FRA';
+                        if (team2.toLowerCase().includes('australia')) return 'AUS';
+                        if (team2.toLowerCase().includes('arsenal')) return 'ARS';
+                        return team2.substring(0, 3).toUpperCase();
+                      })()}
+                    </span>
                   </div>
                   <div className="ticket-meta-grid">
-                    <div>
-                      <div className="ticket-meta-label">SEAT</div>
-                      <div className="ticket-meta-val">Sec 124</div>
-                    </div>
-                    <div>
-                      <div className="ticket-meta-label">ROW</div>
-                      <div className="ticket-meta-val">12</div>
-                    </div>
-                    <div>
-                      <div className="ticket-meta-label">SEAT</div>
-                      <div className="ticket-meta-val">4</div>
-                    </div>
+                    {(() => {
+                      const seatParts = ticketInfo.seat.split(', ');
+                      const seatSec = seatParts[0] || '';
+                      const seatRow = seatParts[1] || '';
+                      const seatNo = seatParts[2] || '';
+                      return (
+                        <>
+                          <div>
+                            <div className="ticket-meta-label">SECTOR / BLOCK</div>
+                            <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{seatSec.replace('Sec ', '').replace('Block ', '')}</div>
+                          </div>
+                          <div>
+                            <div className="ticket-meta-label">ROW</div>
+                            <div className="ticket-meta-val">{seatRow ? seatRow.replace('Row ', '') : 'A'}</div>
+                          </div>
+                          <div>
+                            <div className="ticket-meta-label">SEAT</div>
+                            <div className="ticket-meta-val">{seatNo ? seatNo.replace('Seat ', '') : '1'}</div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                   <div className="ticket-meta-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     <div>
                       <div className="ticket-meta-label">ENTRANCE</div>
-                      <div className="ticket-meta-val">{ticketInfo.gate}</div>
+                      <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{ticketInfo.gate.split(' (')[0]}</div>
                     </div>
                     <div>
                       <div className="ticket-meta-label">START TIME</div>
@@ -1187,6 +1364,107 @@ function App() {
                         <span style={{ color: 'var(--color-warning)', fontWeight: 600 }}>{ord.status}</span>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Ticket Scanning & Wayfinding Unlock Card */}
+            <div className="glass-card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  <Key size={20} style={{ color: 'var(--color-success)' }} />
+                  Smart Ticket Scanner
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: '1.5' }}>
+                Scan or enter spectator ticket codes to automatically match the stadium context, sync the mobile device, and display seating wayfinding route guidelines.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {/* Manual input / scanner */}
+                <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', position: 'relative' }}>
+                  {isScanning && (
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                      background: 'rgba(11,15,25,0.85)', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', zIndex: 10, borderRadius: 'var(--radius-sm)'
+                    }}>
+                      <div className="loader" style={{ fontSize: '0.85rem', color: 'var(--color-primary)', fontWeight: 'bold' }}>
+                        📡 Parsing Barcode RFID...
+                      </div>
+                    </div>
+                  )}
+
+                  <h4 style={{ fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 600 }}>Enter Digital Ticket Code</h4>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="e.g. FIFA-2026-ARGFRA-99824" 
+                      value={scannedTicketCode}
+                      onChange={(e) => setScannedTicketCode(e.target.value)}
+                      style={{ flex: 1, marginBottom: 0 }}
+                    />
+                    <button 
+                      onClick={() => handleScanTicket()} 
+                      className="btn btn-primary" 
+                      style={{ padding: '0.5rem 1rem' }}
+                    >
+                      Scan
+                    </button>
+                  </div>
+
+                  {/* Scan presets */}
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem' }}>Tap a demo ticket to scan:</span>
+                    <div style={{ display: 'flex', gap: '0.4rem', flexDirection: 'column' }}>
+                      {Object.values(STADIUM_CONFIGS).map(st => (
+                        <button
+                          key={st.id}
+                          onClick={() => {
+                            setScannedTicketCode(st.ticket.barcode);
+                            handleScanTicket(st.ticket.barcode);
+                          }}
+                          style={{
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            padding: '0.4rem',
+                            textAlign: 'left',
+                            color: '#fff',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                        >
+                          <div>
+                            <span style={{ fontWeight: 600 }}>{st.name} Ticket</span>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{st.ticket.holder} - Seat {st.ticket.seat.split(',')[0]}</div>
+                          </div>
+                          <span style={{ fontFamily: 'monospace', color: 'var(--color-primary)', fontSize: '0.65rem' }}>{st.ticket.barcode}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scan Feedback banner */}
+                {scanFeedback && (
+                  <div style={{
+                    background: scanFeedback.type === 'success' ? 'var(--color-success-glow)' : 'var(--color-danger-glow)',
+                    border: `1px solid ${scanFeedback.type === 'success' ? 'var(--color-success)' : 'var(--color-danger)'}`,
+                    color: scanFeedback.type === 'success' ? 'var(--color-success)' : 'var(--color-danger)',
+                    padding: '0.75rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.8rem',
+                    lineHeight: '1.4'
+                  }}>
+                    {scanFeedback.message}
                   </div>
                 )}
               </div>

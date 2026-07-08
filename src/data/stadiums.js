@@ -1,7 +1,10 @@
 export const STADIUM_CONFIGS = {
   metlife: {
     id: 'metlife',
-    name: 'MetLife Stadium, NYNJ',
+    name: 'MetLife Stadium',
+    location: 'East Rutherford, NJ',
+    country: 'USA',
+    region: 'North America',
     sport: 'Soccer (FIFA World Cup 2026)',
     capacity: '82,500',
     currentMatch: 'Argentina vs France (Quarter-Final 1)',
@@ -40,7 +43,10 @@ export const STADIUM_CONFIGS = {
   },
   narendra_modi: {
     id: 'narendra_modi',
-    name: 'Narendra Modi Stadium, Ahmedabad',
+    name: 'Narendra Modi Stadium',
+    location: 'Ahmedabad, Gujarat',
+    country: 'India',
+    region: 'South Asia',
     sport: 'Cricket (IPL / ICC T20)',
     capacity: '132,000',
     currentMatch: 'India vs Australia (Final)',
@@ -78,7 +84,10 @@ export const STADIUM_CONFIGS = {
   },
   wembley: {
     id: 'wembley',
-    name: 'Wembley Stadium, London',
+    name: 'Wembley Stadium',
+    location: 'London',
+    country: 'United Kingdom',
+    region: 'Europe',
     sport: 'Football (FA Cup Final)',
     capacity: '90,000',
     currentMatch: 'Chelsea vs Arsenal',
