@@ -23,11 +23,16 @@ import {
   Navigation,
   Eye
 } from 'lucide-react';
+import { STADIUM_CONFIGS } from './data/stadiums';
 
 function App() {
   const [activeTab, setActiveTab] = useState('operations');
   const [geminiApiKey, setGeminiApiKey] = useState('');
   
+  // Stadium Selection State
+  const [currentStadiumId, setCurrentStadiumId] = useState('metlife');
+  const activeStadium = STADIUM_CONFIGS[currentStadiumId];
+
   // Operations State
   const [selectedSector, setSelectedSector] = useState('East Stand');
   const [incidents, setIncidents] = useState([
@@ -82,54 +87,41 @@ function App() {
   const [orders, setOrders] = useState([]);
   const [activeOrderMsg, setActiveOrderMsg] = useState('');
   
-  const ticketInfo = {
-    holder: 'Alex Morgan',
-    match: 'Argentina vs France',
-    stage: 'Quarter-Final 1',
-    date: '19 July 2026',
-    time: '19:00 PM',
-    venue: 'MetLife Stadium, NYNJ',
-    seat: 'Sec 124, Row 12, Seat 4',
-    gate: 'Gate B (East Gate)',
-    barcode: 'FIFA-2026-ARGFRA-99824'
-  };
-
-  const concessionsList = [
-    { id: 1, name: 'Stadium Angus Burger', price: '$12.50', wait: '15 mins', calories: '650 kcal' },
-    { id: 2, name: 'Giant Bavarian Pretzel', price: '$7.00', wait: '4 mins', calories: '380 kcal' },
-    { id: 3, name: 'Neon FIFA Souvenir Soda', price: '$8.50', wait: '2 mins', calories: '120 kcal' },
-    { id: 4, name: 'Ultimate Loaded Nachos', price: '$11.00', wait: '9 mins', calories: '540 kcal' }
-  ];
+  const ticketInfo = activeStadium.ticket;
+  const concessionsList = activeStadium.concessions;
 
   // AI Assistant State
-  const [messages, setMessages] = useState([
-    {
-      sender: 'ai',
-      text: "🏟️ Welcome Alex Morgan! I am **ArenaFlow Assistant**, your AI coordinator for MetLife Stadium. \n\nI have retrieved your smart ticket for **Argentina vs France**. I can guide you to your seat at **Section 124**, recommend low-wait food concessions, or report any operational issues. What can I assist you with?",
-      reasoning: "System prompt injected fan context (Alex Morgan, Section 124, Gate B, Match: ARG-FRA)."
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
+
+  // Synchronize AI greeting with selected stadium context
+  useEffect(() => {
+    setMessages([
+      {
+        sender: 'ai',
+        text: `🏟️ Welcome ${activeStadium.ticket.holder}! I am **ArenaFlow Assistant**, your AI coordinator for ${activeStadium.name}. \n\nI have retrieved your smart ticket for **${activeStadium.currentMatch}**. I can guide you to your seat at **${activeStadium.ticket.seat.split(',')[0]}**, recommend low-wait food concessions, or report any operational issues. What can I assist you with?`,
+        reasoning: `System prompt injected fan context (${activeStadium.ticket.holder}, ${activeStadium.ticket.seat}, Gate: ${activeStadium.ticket.gate}, Match: ${activeStadium.currentMatch}).`
+      }
+    ]);
+  }, [currentStadiumId]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  // Sector metadata for operations
-  const sectorData = {
-    'North Stand': { density: '32%', status: 'Normal', security: 'Level 1', temp: '22°C', colorClass: 'sector-low' },
-    'South Stand': { density: '89%', status: 'Heavy Congestion', security: 'Level 3', temp: '24°C', colorClass: 'sector-high' },
-    'East Stand': { density: '68%', status: 'Moderate Flow', security: 'Level 2', temp: '23°C', colorClass: 'sector-medium' },
-    'West Stand': { density: '45%', status: 'Normal Flow', security: 'Level 1', temp: '21°C', colorClass: 'sector-low' }
-  };
+  // Sector metadata computed dynamically from config
+  const sectorData = {};
+  activeStadium.sectors.forEach(s => {
+    sectorData[s.name] = s;
+  });
 
   // Preset Prompts for Fan
   const presetPrompts = [
-    "How do I navigate to Section 124 from Parking Lot B?",
+    `How do I navigate to ${activeStadium.ticket.seat.split(',')[0]} from entry gate?`,
     "Where is the nearest food stall with wait times under 5 mins?",
-    "Report a medical hazard: broken glass at South Gate C entrance.",
+    "Report a medical hazard: broken glass at South Entrance.",
     "What stadium rules apply to banners and bags?"
   ];
 
@@ -329,7 +321,29 @@ function App() {
         <div className="brand">
           <Activity className="brand-icon" size={28} />
           <h1 className="brand-title">ArenaFlow AI</h1>
-          <span className="brand-badge">FIFA 2026</span>
+          <select 
+            value={currentStadiumId} 
+            onChange={(e) => {
+              setCurrentStadiumId(e.target.value);
+              setSelectedSector(e.target.value === 'narendra_modi' ? 'North Stand' : 'East Stand');
+            }}
+            style={{
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-color)',
+              color: '#fff',
+              borderRadius: '8px',
+              padding: '0.4rem 0.8rem',
+              fontSize: '0.8rem',
+              fontWeight: '600',
+              outline: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+            }}
+          >
+            <option value="metlife">⚽ MetLife Stadium</option>
+            <option value="narendra_modi">🏏 Narendra Modi</option>
+            <option value="wembley">⚽ Wembley Stadium</option>
+          </select>
         </div>
 
         {/* Global Stats Ticker */}
@@ -337,17 +351,17 @@ function App() {
           <div className="status-item">
             <span className="status-dot live"></span>
             <span className="status-label">Match:</span>
-            <span className="status-val">{ticketInfo.match}</span>
+            <span className="status-val">{activeStadium.currentMatch}</span>
           </div>
           <div className="status-item">
             <span className="status-dot"></span>
             <span className="status-label">Stadium Scan:</span>
-            <span className="status-val">67% (52,382 Fans)</span>
+            <span className="status-val">{activeStadium.currentScan}</span>
           </div>
           <div className="status-item">
             <CloudRain size={16} className="status-dot warning" style={{background: 'none', boxShadow: 'none'}} />
             <span className="status-label">Weather:</span>
-            <span className="status-val">22°C (Clear)</span>
+            <span className="status-val">{activeStadium.weather}</span>
           </div>
         </div>
 
@@ -721,36 +735,24 @@ function App() {
                 <div className="navigation-guide-card">
                   <h4 style={{ fontSize: '0.85rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     <Navigation size={14} style={{ color: 'var(--color-primary)' }} />
-                    Live Wayfinding (Gate B Route)
+                    Live Wayfinding ({activeStadium.ticket.gate.split(' ')[0]} Route)
                   </h4>
                   
-                  <div className="nav-route-step done">
-                    <div className="nav-step-icon">
-                      <Check size={10} />
-                    </div>
-                    <div className="nav-step-text">
-                      <div className="nav-step-title">Security Checkpoint (Gate B)</div>
-                      <div className="nav-step-desc">Ticket scanned at 18:31. Clear entry.</div>
-                    </div>
-                  </div>
-
-                  <div className={`nav-route-step ${currentRouteStep === 1 ? 'active' : 'done'}`}>
-                    <div className="nav-step-icon">
-                      {currentRouteStep === 1 ? <Flame size={10} /> : <Check size={10} />}
-                    </div>
-                    <div className="nav-step-text">
-                      <div className="nav-step-title">Lower Concourse Promenade</div>
-                      <div className="nav-step-desc">Head east 120m towards Concession Stand 8. Moderate crowd.</div>
-                    </div>
-                  </div>
-
-                  <div className={`nav-route-step ${currentRouteStep === 2 ? 'active' : ''}`}>
-                    <div className="nav-step-icon">2</div>
-                    <div className="nav-step-text">
-                      <div className="nav-step-title">Section 124 Vomitory Entrance</div>
-                      <div className="nav-step-desc">Climb short stairs on right. Seating row 12.</div>
-                    </div>
-                  </div>
+                  {activeStadium.wayfinding.map((stepItem, idx) => {
+                    const isDone = currentRouteStep > idx;
+                    const isActive = currentRouteStep === idx;
+                    return (
+                      <div key={idx} className={`nav-route-step ${isDone ? 'done' : isActive ? 'active' : ''}`}>
+                        <div className="nav-step-icon">
+                          {isDone ? <Check size={10} /> : isActive ? <Flame size={10} /> : idx + 1}
+                        </div>
+                        <div className="nav-step-text">
+                          <div className="nav-step-title">{stepItem.title}</div>
+                          <div className="nav-step-desc">{stepItem.desc}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Concession Stand Menu */}
