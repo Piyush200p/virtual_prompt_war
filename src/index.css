@@ -580,11 +580,10 @@ body {
 /* Fan Experience Portal Mockup Layout */
 .fan-portal-layout {
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 1fr 400px 1fr;
   gap: 2rem;
   align-items: start;
-  justify-content: center;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 

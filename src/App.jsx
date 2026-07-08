@@ -671,6 +671,143 @@ function App() {
         {/* Tab 2: Fan Experience Portal */}
         {activeTab === 'fan' && (
           <div className="fan-portal-layout">
+
+            {/* ── Live Route Visualizer Panel ── */}
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className="card-header">
+                <h2 className="card-title">
+                  <Navigation size={20} style={{ color: 'var(--color-primary)' }} />
+                  Live Route Visualizer
+                </h2>
+                <span style={{
+                  fontSize: '0.7rem', background: 'rgba(16,185,129,0.15)',
+                  color: 'var(--color-success)', border: '1px solid rgba(16,185,129,0.3)',
+                  borderRadius: '6px', padding: '0.2rem 0.5rem', fontWeight: 600
+                }}>● TRACKING</span>
+              </div>
+
+              {/* SVG Map with animated route overlay */}
+              <div className="map-visualizer" style={{ position: 'relative' }}>
+                <svg className="stadium-svg" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Stadium background — same shape as operations map */}
+                  <path d="M200 15 C320 15, 385 65, 385 150 C385 235, 320 285, 200 285 C80 285, 15 235, 15 150 C15 65, 80 15, 200 15 Z"
+                    fill="rgba(11,15,25,0.7)" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
+
+                  {/* Pitch */}
+                  <rect x="140" y="110" width="120" height="80" rx="4" fill="#0a3d2e" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+                  <line x1="200" y1="110" x2="200" y2="190" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+                  <circle cx="200" cy="150" r="20" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" fill="none" />
+
+                  {/* Dim sector fills */}
+                  {activeStadium.sectors.map((s, i) => {
+                    const paths = [
+                      "M100 25 C150 18, 250 18, 300 25 L260 90 C230 85, 170 85, 140 90 Z",
+                      "M305 32 C375 75, 375 225, 305 268 L265 198 C280 178, 280 122, 265 102 Z",
+                      "M100 275 C150 282, 250 282, 300 275 L260 210 C230 215, 170 215, 140 210 Z",
+                      "M95 32 C25 75, 25 225, 95 268 L135 198 C120 178, 120 122, 135 102 Z"
+                    ];
+                    const opacityMap = { 'sector-low': 0.08, 'sector-medium': 0.14, 'sector-high': 0.22 };
+                    const colorMap = { 'sector-low': '#10b981', 'sector-medium': '#f59e0b', 'sector-high': '#ef4444' };
+                    return (
+                      <path key={i} d={paths[i]}
+                        fill={colorMap[s.colorClass]}
+                        fillOpacity={opacityMap[s.colorClass]}
+                        stroke={colorMap[s.colorClass]}
+                        strokeOpacity="0.2"
+                        strokeWidth="1"
+                      />
+                    );
+                  })}
+
+                  {/* Neon route path — draw lines between all visited waypoints */}
+                  {activeStadium.svgRoute.slice(0, currentRouteStep + 1).map((pt, i, arr) => {
+                    if (i === 0) return null;
+                    const prev = arr[i - 1];
+                    return (
+                      <line key={`line-${i}`}
+                        x1={prev.x} y1={prev.y} x2={pt.x} y2={pt.y}
+                        stroke="#3b82f6"
+                        strokeWidth="2.5"
+                        strokeDasharray="6 3"
+                        strokeLinecap="round"
+                        opacity="0.85"
+                      />
+                    );
+                  })}
+
+                  {/* Waypoint circles — visited ones are filled, future ones are ghosts */}
+                  {activeStadium.svgRoute.map((pt, i) => {
+                    const isVisited = i <= currentRouteStep;
+                    const isCurrent = i === currentRouteStep;
+                    return (
+                      <g key={`wp-${i}`}>
+                        {/* Outer glow ring for current position */}
+                        {isCurrent && (
+                          <circle cx={pt.x} cy={pt.y} r="14" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.4)" strokeWidth="1">
+                            <animate attributeName="r" values="10;17;10" dur="1.8s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.6;0.1;0.6" dur="1.8s" repeatCount="indefinite" />
+                          </circle>
+                        )}
+                        {/* Main dot */}
+                        <circle cx={pt.x} cy={pt.y} r={isCurrent ? 7 : 5}
+                          fill={isVisited ? (isCurrent ? '#3b82f6' : '#10b981') : 'rgba(255,255,255,0.12)'}
+                          stroke={isVisited ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)'}
+                          strokeWidth="1.5"
+                        />
+                        {/* Label text */}
+                        <text x={pt.x} y={pt.y - 12}
+                          textAnchor="middle"
+                          fontSize="8"
+                          fill={isVisited ? '#fff' : 'rgba(255,255,255,0.3)'}
+                          fontFamily="system-ui, sans-serif"
+                          fontWeight={isCurrent ? '700' : '400'}
+                        >
+                          {pt.label}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+
+              {/* Step progress indicator */}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0 0.25rem' }}>
+                {activeStadium.svgRoute.map((pt, i) => (
+                  <React.Fragment key={i}>
+                    <div style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem', flex: 1
+                    }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: i <= currentRouteStep ? (i === currentRouteStep ? 'var(--color-primary)' : 'var(--color-success)') : 'var(--bg-tertiary)',
+                        border: `2px solid ${i <= currentRouteStep ? 'transparent' : 'var(--border-color)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.7rem', fontWeight: 700, color: '#fff',
+                        boxShadow: i === currentRouteStep ? '0 0 12px rgba(59,130,246,0.6)' : 'none',
+                        transition: 'all 0.4s ease'
+                      }}>
+                        {i < currentRouteStep ? '✓' : i + 1}
+                      </div>
+                      <span style={{ fontSize: '0.6rem', color: i <= currentRouteStep ? 'var(--text-primary)' : 'var(--text-secondary)', textAlign: 'center' }}>
+                        {pt.label}
+                      </span>
+                    </div>
+                    {i < activeStadium.svgRoute.length - 1 && (
+                      <div style={{
+                        height: 2, flex: 2,
+                        background: i < currentRouteStep ? 'var(--color-success)' : 'var(--border-color)',
+                        borderRadius: 2, marginBottom: 18, transition: 'background 0.4s ease'
+                      }} />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                <strong style={{ color: 'var(--color-primary)' }}>How it works:</strong> Route dots are computed from the stadium's spatial waypoint registry. In production, the fan's GPS/Bluetooth coordinates update this path in real-time using crowd-density-aware pathfinding.
+              </p>
+            </div>
+
             {/* Phone Screen Mockup */}
             <div className="phone-mockup">
               <div className="phone-notch">

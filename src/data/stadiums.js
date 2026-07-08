@@ -7,6 +7,13 @@ export const STADIUM_CONFIGS = {
     currentMatch: 'Argentina vs France (Quarter-Final 1)',
     currentScan: '73.8% (60,885 Fans)',
     weather: '22°C (Clear)',
+    // SVG route: coordinates through the 400x300 viewBox matching stadium sectors
+    // Step 0 = Gate entrance (east side), Step 1 = Concourse promenade, Step 2 = Seating section
+    svgRoute: [
+      { x: 340, y: 150, label: 'Gate B', step: 0 },
+      { x: 290, y: 150, label: 'East Promenade', step: 1 },
+      { x: 220, y: 140, label: 'Section 124', step: 2 },
+    ],
     ticket: {
       holder: 'Alex Morgan',
       seat: 'Sec 124, Row 12, Seat 4',
@@ -39,6 +46,12 @@ export const STADIUM_CONFIGS = {
     currentMatch: 'India vs Australia (Final)',
     currentScan: '88.5% (116,820 Fans)',
     weather: '32°C (Humid)',
+    // Oval cricket stadium — enters from North-West (top-left), sweeps to Block J near south boundary
+    svgRoute: [
+      { x: 100, y: 50, label: 'Gate 3', step: 0 },
+      { x: 160, y: 100, label: 'Ring Concourse', step: 1 },
+      { x: 185, y: 185, label: 'Block J', step: 2 },
+    ],
     ticket: {
       holder: 'Alex Morgan',
       seat: 'Block J, Row 5, Seat 18',
@@ -71,6 +84,12 @@ export const STADIUM_CONFIGS = {
     currentMatch: 'Chelsea vs Arsenal',
     currentScan: '58.2% (52,380 Fans)',
     weather: '16°C (Light Drizzle)',
+    // Rectangular stadium — enters from West (left), walks through concourse corridor, up to Level 2 Club
+    svgRoute: [
+      { x: 55, y: 150, label: 'West Gate', step: 0 },
+      { x: 130, y: 150, label: 'Concourse', step: 1 },
+      { x: 175, y: 120, label: 'Level 2 Suite', step: 2 },
+    ],
     ticket: {
       holder: 'Alex Morgan',
       seat: 'Level 2 Club, Row A, Seat 112',
