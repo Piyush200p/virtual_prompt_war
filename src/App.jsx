@@ -37,6 +37,12 @@ function App() {
   const [currentStadiumId, setCurrentStadiumId] = useState('metlife');
   const activeStadium = STADIUM_CONFIGS[currentStadiumId];
 
+  // Sector metadata computed dynamically from config
+  const sectorData = {};
+  activeStadium.sectors.forEach(s => {
+    sectorData[s.name] = s;
+  });
+
   // Operations State
   const [selectedSector, setSelectedSector] = useState('East Stand');
   const [incidents, setIncidents] = useState([
@@ -213,12 +219,7 @@ function App() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  // Sector metadata computed dynamically from config
-  const sectorData = {};
-  activeStadium.sectors.forEach(s => {
-    sectorData[s.name] = s;
-  });
-  // NOTE: simulatedSectorData is built below the SIM_PHASES definition (uses sectorData as base)
+
 
   // Preset Prompts for Fan
   const presetPrompts = [
