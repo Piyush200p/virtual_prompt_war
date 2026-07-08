@@ -38,6 +38,7 @@ const renderStadiumMapElements = (stadiumId, isFanView = false) => {
 
   switch (stadiumId) {
     case 'narendra_modi':
+    case 'melbourne_cg':
       // Circular cricket stadium with custom boundaries & pitch strip
       return (
         <g id="modi-stadium-layout">
@@ -560,13 +561,16 @@ function App() {
       } else if (upperCode.includes("WEMB") || upperCode.includes("CHEARS") || upperCode.includes("WEMBLEY")) {
         matchedId = "wembley";
         matchedName = "Wembley Stadium (UK)";
+      } else if (upperCode.includes("MCG") || upperCode.includes("ASHES") || upperCode.includes("MELBOURNE")) {
+        matchedId = "melbourne_cg";
+        matchedName = "Melbourne Cricket Ground (Australia)";
       }
 
       setIsScanning(false);
 
       if (matchedId) {
         setCurrentStadiumId(matchedId);
-        setSelectedSector(matchedId === 'narendra_modi' ? 'North Stand' : 'East Stand');
+        setSelectedSector((matchedId === 'narendra_modi' || matchedId === 'melbourne_cg') ? 'North Stand' : 'East Stand');
         setCurrentRouteStep(0); // Reset wayfinding to step 0 on scan
         setScanFeedback({
           type: 'success',
@@ -607,7 +611,7 @@ function App() {
                 gap: '0.5rem'
               }}
             >
-              <span>{activeStadium.id === 'narendra_modi' ? '🏏' : '⚽'} {activeStadium.name}</span>
+              <span>{(activeStadium.id === 'narendra_modi' || activeStadium.id === 'melbourne_cg') ? '🏏' : '⚽'} {activeStadium.name}</span>
               <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>▼</span>
             </button>
 
@@ -639,7 +643,7 @@ function App() {
 
                 {/* Filter Pills */}
                 <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                  {['All', 'North America', 'Europe', 'South Asia'].map(reg => (
+                  {['All', 'North America', 'Europe', 'South Asia', 'Oceania'].map(reg => (
                     <button
                       key={reg}
                       onClick={() => setSelectedRegion(reg)}
@@ -674,7 +678,7 @@ function App() {
                         key={stadium.id}
                         onClick={() => {
                           setCurrentStadiumId(stadium.id);
-                          setSelectedSector(stadium.id === 'narendra_modi' ? 'North Stand' : 'East Stand');
+                          setSelectedSector((stadium.id === 'narendra_modi' || stadium.id === 'melbourne_cg') ? 'North Stand' : 'East Stand');
                           setIsSearchOpen(false);
                         }}
                         style={{
@@ -698,7 +702,7 @@ function App() {
                         }}
                       >
                         <div>
-                          <div style={{ fontSize: '0.78rem', fontWeight: '600', color: '#fff' }}>{stadium.id === 'narendra_modi' ? '🏏' : '⚽'} {stadium.name}</div>
+                          <div style={{ fontSize: '0.78rem', fontWeight: '600', color: '#fff' }}>{(stadium.id === 'narendra_modi' || stadium.id === 'melbourne_cg') ? '🏏' : '⚽'} {stadium.name}</div>
                           <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{stadium.location}, {stadium.country}</div>
                         </div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--color-primary)', fontWeight: '600' }}>{stadium.sport.split(' ')[0]}</div>

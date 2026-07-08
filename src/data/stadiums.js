@@ -122,5 +122,45 @@ export const STADIUM_CONFIGS = {
       { step: 1, title: 'Bobby Moore Gallery Concourse', desc: 'Head straight past Lounge 2 towards Elevator Block D.' },
       { step: 2, title: 'Level 2 Executive Suites', desc: 'Exit elevator. Suite corridor Section 112 is on your left.' }
     ]
+  },
+  melbourne_cg: {
+    id: 'melbourne_cg',
+    name: 'Melbourne Cricket Ground',
+    location: 'Melbourne, Victoria',
+    country: 'Australia',
+    region: 'Oceania',
+    sport: 'Cricket (The Ashes / Test Match)',
+    capacity: '100,024',
+    currentMatch: 'Australia vs England (Boxing Day Test)',
+    currentScan: '92.1% (92,120 Fans)',
+    weather: '18°C (Windy)',
+    svgRoute: [
+      { x: 340, y: 80, label: 'Gate 1 Checkpoint', step: 0 },
+      { x: 260, y: 110, label: 'Great Southern Stand', step: 1 },
+      { x: 190, y: 150, label: 'Shane Warne Stand', step: 2 },
+    ],
+    ticket: {
+      holder: 'Alex Morgan',
+      seat: 'Shane Warne Stand, Section M4, Row C, Seat 12',
+      gate: 'Gate 1 Entrance (Great Southern Stand)',
+      barcode: 'MCG-ASHES-AUSENG-77312'
+    },
+    sectors: [
+      { name: 'North Stand', density: '81%', status: 'Heavy Flow', security: 'Level 2', temp: '18°C', colorClass: 'sector-high' },
+      { name: 'East Stand', density: '95%', status: 'Severe Congestion', security: 'Level 3', temp: '19°C', colorClass: 'sector-high' },
+      { name: 'South Stand', density: '62%', status: 'Moderate Flow', security: 'Level 2', temp: '17°C', colorClass: 'sector-medium' },
+      { name: 'West Stand', density: '38%', status: 'Normal Flow', security: 'Level 1', temp: '17°C', colorClass: 'sector-low' }
+    ],
+    concessions: [
+      { id: 1, name: 'Aussie Four\'N Twenty Pie', price: '$8.50', wait: '11 mins', calories: '420 kcal' },
+      { id: 2, name: 'Hot Chips Bucket', price: '$6.50', wait: '5 mins', calories: '490 kcal' },
+      { id: 3, name: 'Cold Victoria Bitter Ale', price: '$9.80', wait: '3 mins', calories: '160 kcal' },
+      { id: 4, name: 'Chiko Roll Snack Duo', price: '$7.50', wait: '4 mins', calories: '310 kcal' }
+    ],
+    wayfinding: [
+      { step: 0, title: 'Gate 1 Ticket Checkpoint', desc: 'Scan ticket near Jolimont station side turnstiles.' },
+      { step: 1, title: 'Great Southern Stand Concourse', desc: 'Proceed clockwise past Concession Stand #1.' },
+      { step: 2, title: 'Shane Warne Stand Level 1', desc: 'Enter vomitory M4. Row C seats are just inside the lower tier.' }
+    ]
   }
 };
