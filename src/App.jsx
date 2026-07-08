@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Shield, 
   AlertTriangle, 
@@ -21,7 +21,11 @@ import {
   Flame,
   Utensils,
   Navigation,
-  Eye
+  Eye,
+  Play,
+  Pause,
+  Users,
+  LogOut
 } from 'lucide-react';
 import { STADIUM_CONFIGS } from './data/stadiums';
 
@@ -86,9 +90,107 @@ function App() {
   const [currentRouteStep, setCurrentRouteStep] = useState(1);
   const [orders, setOrders] = useState([]);
   const [activeOrderMsg, setActiveOrderMsg] = useState('');
-  
+
   const ticketInfo = activeStadium.ticket;
   const concessionsList = activeStadium.concessions;
+
+  // ── Game Simulation Engine ──────────────────────────────────────────────────
+  // Phase definitions: each maps 4 sector names → { density%, colorClass, status }
+  const SIM_PHASES = {
+    gates_open: {
+      label: 'Gates Open',
+      icon: '🚪',
+      color: 'var(--color-success)',
+      desc: 'Fans streaming in through entry gates. North & East filling up.',
+      sectors: {
+        'North Stand': { density: '42%', colorClass: 'sector-low', status: 'Filling Up' },
+        'East Stand':  { density: '61%', colorClass: 'sector-medium', status: 'Moderate Flow' },
+        'South Stand': { density: '28%', colorClass: 'sector-low', status: 'Early Arrivals' },
+        'West Stand':  { density: '35%', colorClass: 'sector-low', status: 'Normal Flow' },
+      }
+    },
+    match_starting: {
+      label: 'Match Starting',
+      icon: '⚡',
+      color: 'var(--color-warning)',
+      desc: 'All stands filling rapidly. Concessions at peak load.',
+      sectors: {
+        'North Stand': { density: '79%', colorClass: 'sector-medium', status: 'Heavy Flow' },
+        'East Stand':  { density: '85%', colorClass: 'sector-high', status: 'Congested' },
+        'South Stand': { density: '71%', colorClass: 'sector-medium', status: 'Filling Fast' },
+        'West Stand':  { density: '88%', colorClass: 'sector-high', status: 'At Capacity' },
+      }
+    },
+    match_live: {
+      label: 'Match Live',
+      icon: '🔴',
+      color: 'var(--color-danger)',
+      desc: 'All sectors at peak. Gates secured. Operations on alert.',
+      sectors: {
+        'North Stand': { density: '94%', colorClass: 'sector-high', status: 'Severe Congestion' },
+        'East Stand':  { density: '91%', colorClass: 'sector-high', status: 'Severe Congestion' },
+        'South Stand': { density: '96%', colorClass: 'sector-high', status: 'At Max Capacity' },
+        'West Stand':  { density: '93%', colorClass: 'sector-high', status: 'Severe Congestion' },
+      }
+    },
+    half_time: {
+      label: 'Half Time',
+      icon: '⏸',
+      color: 'var(--color-purple)',
+      desc: 'Mass movement to concession stands. Corridors at risk.',
+      sectors: {
+        'North Stand': { density: '55%', colorClass: 'sector-medium', status: 'Evacuating Seats' },
+        'East Stand':  { density: '48%', colorClass: 'sector-low', status: 'Moving to Concessions' },
+        'South Stand': { density: '67%', colorClass: 'sector-medium', status: 'Partial Evacuation' },
+        'West Stand':  { density: '52%', colorClass: 'sector-medium', status: 'Moderate Movement' },
+      }
+    },
+    crowd_exiting: {
+      label: 'Crowd Exiting',
+      icon: '🚶',
+      color: '#94a3b8',
+      desc: 'Final whistle blown. Coordinated wave exit underway.',
+      sectors: {
+        'North Stand': { density: '38%', colorClass: 'sector-low', status: 'Wave 1 Exiting' },
+        'East Stand':  { density: '22%', colorClass: 'sector-low', status: 'Clearing' },
+        'South Stand': { density: '44%', colorClass: 'sector-low', status: 'Wave 2 Exiting' },
+        'West Stand':  { density: '17%', colorClass: 'sector-low', status: 'Almost Clear' },
+      }
+    }
+  };
+
+  const [simPhase, setSimPhase] = useState(null);       // active phase key or null
+  const [simTick, setSimTick] = useState(0);            // drives micro-fluctuations
+  const simIntervalRef = useRef(null);
+
+  // Start / stop the tick timer whenever simPhase changes
+  useEffect(() => {
+    if (simIntervalRef.current) clearInterval(simIntervalRef.current);
+    if (simPhase) {
+      simIntervalRef.current = setInterval(() => {
+        setSimTick(t => t + 1);
+      }, 1800);
+    }
+    return () => clearInterval(simIntervalRef.current);
+  }, [simPhase]);
+
+  // Build the active sector data: simulation overrides real config when a phase is active
+  const sectorNames = ['North Stand', 'East Stand', 'South Stand', 'West Stand'];
+  const simulatedSectorData = {};
+  sectorNames.forEach(name => {
+    const base = sectorData[name];
+    if (simPhase && SIM_PHASES[simPhase]) {
+      const override = SIM_PHASES[simPhase].sectors[name];
+      // Add subtle ±2% tick fluctuation to density number for live feel
+      const basePct = parseInt(override.density);
+      const fluctuation = (simTick % 3 === 0) ? 1 : (simTick % 3 === 1) ? -1 : 0;
+      const livePct = Math.min(99, Math.max(1, basePct + fluctuation));
+      simulatedSectorData[name] = { ...base, ...override, density: `${livePct}%` };
+    } else {
+      simulatedSectorData[name] = base;
+    }
+  });
+  // ────────────────────────────────────────────────────────────────────────────
 
   // AI Assistant State
   const [messages, setMessages] = useState([]);
@@ -116,6 +218,7 @@ function App() {
   activeStadium.sectors.forEach(s => {
     sectorData[s.name] = s;
   });
+  // NOTE: simulatedSectorData is built below the SIM_PHASES definition (uses sectorData as base)
 
   // Preset Prompts for Fan
   const presetPrompts = [
@@ -463,6 +566,82 @@ function App() {
               </div>
             </div>
 
+            {/* ── Game Simulation Control Panel ── */}
+            <div className="glass-card" style={{ padding: '1.25rem' }}>
+              <div className="card-header" style={{ marginBottom: '1rem' }}>
+                <h2 className="card-title">
+                  <Play size={20} style={{ color: 'var(--color-warning)' }} />
+                  Match-Day Simulation Engine
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {simPhase ? (
+                    <>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-danger)', display: 'inline-block', boxShadow: '0 0 8px var(--color-danger)', animation: 'pulse 1.2s ease-in-out infinite' }} />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 700 }}>SIMULATION RUNNING</span>
+                      <button
+                        onClick={() => { setSimPhase(null); setSimTick(0); }}
+                        style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444', borderRadius: '6px', padding: '0.25rem 0.75rem', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                      >Reset</button>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Select a phase to simulate live crowd data</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Phase Buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem', marginBottom: simPhase ? '1rem' : 0 }}>
+                {Object.entries(SIM_PHASES).map(([key, phase]) => (
+                  <button
+                    key={key}
+                    onClick={() => { setSimPhase(key); setSimTick(0); }}
+                    style={{
+                      background: simPhase === key ? `rgba(59,130,246,0.15)` : 'var(--bg-tertiary)',
+                      border: `1.5px solid ${simPhase === key ? phase.color : 'var(--border-color)'}`,
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.75rem 0.5rem',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.25s ease',
+                      boxShadow: simPhase === key ? `0 0 16px ${phase.color}40` : 'none',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.4rem' }}>{phase.icon}</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: simPhase === key ? '#fff' : 'var(--text-secondary)', lineHeight: 1.2 }}>{phase.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Active Phase Status Banner */}
+              {simPhase && (
+                <div style={{
+                  background: `linear-gradient(90deg, ${SIM_PHASES[simPhase].color}18, transparent)`,
+                  border: `1px solid ${SIM_PHASES[simPhase].color}50`,
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.75rem 1rem',
+                  display: 'flex', alignItems: 'center', gap: '0.75rem'
+                }}>
+                  <span style={{ fontSize: '1.5rem' }}>{SIM_PHASES[simPhase].icon}</span>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: SIM_PHASES[simPhase].color }}>{SIM_PHASES[simPhase].label} — ACTIVE</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>{SIM_PHASES[simPhase].desc}</div>
+                  </div>
+                  <div style={{ marginLeft: 'auto', display: 'flex', gap: '1.5rem' }}>
+                    {Object.entries(simulatedSectorData).map(([name, data]) => (
+                      <div key={name} style={{ textAlign: 'center' }}>
+                        <div style={{
+                          fontSize: '1.1rem', fontWeight: 800,
+                          color: data.colorClass === 'sector-high' ? 'var(--color-danger)' : data.colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)'
+                        }}>{data.density}</div>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>{name.replace(' Stand', '')}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Map and Incident Logger Layout */}
             <div className="operations-center-layout">
               {/* Stadium Map Column */}
@@ -490,28 +669,28 @@ function App() {
 
                     {/* North Stand Sector */}
                     <path 
-                      className={`stadium-sector ${selectedSector === 'North Stand' ? 'sector-selected' : ''} ${sectorData['North Stand'].colorClass}`}
+                      className={`stadium-sector ${selectedSector === 'North Stand' ? 'sector-selected' : ''} ${simulatedSectorData['North Stand'].colorClass}`}
                       d="M100 25 C150 18, 250 18, 300 25 L260 90 C230 85, 170 85, 140 90 Z" 
                       onClick={() => setSelectedSector('North Stand')}
                     />
                     
                     {/* East Stand Sector */}
                     <path 
-                      className={`stadium-sector ${selectedSector === 'East Stand' ? 'sector-selected' : ''} ${sectorData['East Stand'].colorClass}`}
+                      className={`stadium-sector ${selectedSector === 'East Stand' ? 'sector-selected' : ''} ${simulatedSectorData['East Stand'].colorClass}`}
                       d="M305 32 C375 75, 375 225, 305 268 L265 198 C280 178, 280 122, 265 102 Z" 
                       onClick={() => setSelectedSector('East Stand')}
                     />
 
                     {/* South Stand Sector */}
                     <path 
-                      className={`stadium-sector ${selectedSector === 'South Stand' ? 'sector-selected' : ''} ${sectorData['South Stand'].colorClass}`}
+                      className={`stadium-sector ${selectedSector === 'South Stand' ? 'sector-selected' : ''} ${simulatedSectorData['South Stand'].colorClass}`}
                       d="M100 275 C150 282, 250 282, 300 275 L260 210 C230 215, 170 215, 140 210 Z" 
                       onClick={() => setSelectedSector('South Stand')}
                     />
 
                     {/* West Stand Sector */}
                     <path 
-                      className={`stadium-sector ${selectedSector === 'West Stand' ? 'sector-selected' : ''} ${sectorData['West Stand'].colorClass}`}
+                      className={`stadium-sector ${selectedSector === 'West Stand' ? 'sector-selected' : ''} ${simulatedSectorData['West Stand'].colorClass}`}
                       d="M95 32 C25 75, 25 225, 95 268 L135 198 C120 178, 120 122, 135 102 Z" 
                       onClick={() => setSelectedSector('West Stand')}
                     />
@@ -541,21 +720,22 @@ function App() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.85rem' }}>
                     <div>
                       <span style={{ color: 'var(--text-secondary)' }}>Live Crowd Density: </span>
-                      <span style={{ fontWeight: '600', color: selectedSector === 'South Stand' ? 'var(--color-danger)' : 'var(--text-primary)' }}>
-                        {sectorData[selectedSector].density}
+                      <span style={{ fontWeight: '600', color: simulatedSectorData[selectedSector].colorClass === 'sector-high' ? 'var(--color-danger)' : simulatedSectorData[selectedSector].colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)' }}>
+                        {simulatedSectorData[selectedSector].density}
+                        {simPhase && <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)', marginLeft: '0.4rem', fontWeight: 400 }}>● LIVE</span>}
                       </span>
                     </div>
                     <div>
                       <span style={{ color: 'var(--text-secondary)' }}>Status: </span>
-                      <span style={{ fontWeight: '600' }}>{sectorData[selectedSector].status}</span>
+                      <span style={{ fontWeight: '600' }}>{simulatedSectorData[selectedSector].status}</span>
                     </div>
                     <div>
                       <span style={{ color: 'var(--text-secondary)' }}>Security Level: </span>
-                      <span style={{ fontWeight: '600' }}>{sectorData[selectedSector].security}</span>
+                      <span style={{ fontWeight: '600' }}>{simulatedSectorData[selectedSector].security}</span>
                     </div>
                     <div>
                       <span style={{ color: 'var(--text-secondary)' }}>Sect. Climate: </span>
-                      <span style={{ fontWeight: '600' }}>{sectorData[selectedSector].temp}</span>
+                      <span style={{ fontWeight: '600' }}>{simulatedSectorData[selectedSector].temp}</span>
                     </div>
                   </div>
                 </div>
