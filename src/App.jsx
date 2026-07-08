@@ -140,14 +140,87 @@ const MODEL_SPECS = {
   }
 };
 
+const sampleStadiumJSON = `{
+  "id": "lusail",
+  "name": "Lusail Iconic Stadium",
+  "location": "Lusail, Doha",
+  "country": "Qatar",
+  "region": "Middle East",
+  "sport": "Soccer (World Cup Final)",
+  "capacity": "88,966",
+  "currentMatch": "Argentina vs France (World Cup Final)",
+  "currentScan": "96.4% (85,800 Fans)",
+  "weather": "25°C (Breezy)",
+  "svgRoute": [
+    { "x": 50, "y": 250, "label": "West Gate Check", "step": 0 },
+    { "x": 180, "y": 200, "label": "VIP Lobby", "step": 1 },
+    { "x": 200, "y": 140, "label": "Section 104", "step": 2 }
+  ],
+  "ticket": {
+    "holder": "Alex Morgan",
+    "seat": "Sec 104, Row 5, Seat 14",
+    "gate": "Gate A (West Gate)",
+    "barcode": "FIFA-2022-LUSAIL-10029"
+  },
+  "sectors": [
+    { "name": "North Stand", "density": "89%", "status": "Heavy Flow", "security": "Level 2", "temp": "25°C", "colorClass": "sector-high" },
+    { "name": "East Stand", "density": "94%", "status": "Severe Congestion", "security": "Level 3", "temp": "26°C", "colorClass": "sector-high" },
+    { "name": "South Stand", "density": "52%", "status": "Moderate Flow", "security": "Level 2", "temp": "24°C", "colorClass": "sector-medium" },
+    { "name": "West Stand", "density": "31%", "status": "Normal Flow", "security": "Level 1", "temp": "24°C", "colorClass": "sector-low" }
+  ],
+  "concessions": [
+    { "id": 1, "name": "Shawarma Wrap Special", "price": "$9.50", "wait": "8 mins", "calories": "410 kcal" },
+    { "id": 2, "name": "Hummus & Pita Plate", "price": "$6.00", "wait": "3 mins", "calories": "280 kcal" },
+    { "id": 3, "name": "Karak Cardamom Tea", "price": "$4.50", "wait": "2 mins", "calories": "90 kcal" }
+  ],
+  "wayfinding": [
+    { "step": 0, "title": "Gate A West Gate", "desc": "NFC Card scan successfully completed at main entry." },
+    { "step": 1, "title": "Golden Ring VIP Promenade", "desc": "Proceed past security checkpoint towards section 104 escalators." },
+    { "step": 2, "title": "Section 104 VIP Tier", "desc": "Walk straight ahead. Row 5 seats are situated directly behind player dugouts." }
+  ]
+}`;
+
 function App() {
   const [activeTab, setActiveTab] = useState('operations');
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [selectedRouteModel, setSelectedRouteModel] = useState('gemini_flash');
+  const [isDevMode, setIsDevMode] = useState(false);
+  const [injectedJson, setInjectedJson] = useState('');
+  const [stadiumsRegistry, setStadiumsRegistry] = useState(STADIUM_CONFIGS);
   
   // Stadium Selection State
   const [currentStadiumId, setCurrentStadiumId] = useState('metlife');
-  const activeStadium = STADIUM_CONFIGS[currentStadiumId];
+  const activeStadium = stadiumsRegistry[currentStadiumId];
+
+  const handleLoadSampleJSON = () => {
+    setInjectedJson(sampleStadiumJSON);
+  };
+
+  const handleInjectStadium = () => {
+    try {
+      if (!injectedJson.trim()) {
+        alert("Please paste a JSON configuration first or click 'Load Sample'.");
+        return;
+      }
+      const parsed = JSON.parse(injectedJson);
+      if (!parsed.id || !parsed.name || !parsed.sectors || !parsed.ticket) {
+        throw new Error("Missing required schema fields (id, name, sectors, ticket).");
+      }
+      setStadiumsRegistry(prev => ({
+        ...prev,
+        [parsed.id]: parsed
+      }));
+      setCurrentStadiumId(parsed.id);
+      setSelectedSector(parsed.sectors[0]?.name || 'East Stand');
+      setCurrentRouteStep(0);
+      setScanFeedback({
+        type: 'success',
+        message: `✅ Custom Stadium "${parsed.name}" successfully injected into the local memory registry!`
+      });
+    } catch (err) {
+      alert(`Invalid Stadium JSON configuration: ${err.message}`);
+    }
+  };
 
   // Sector metadata computed dynamically from config
   const sectorData = {};
@@ -734,35 +807,68 @@ function App() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="navigation-tabs">
-          <button 
-            className={`nav-tab-btn ${activeTab === 'operations' ? 'active' : ''}`}
-            onClick={() => setActiveTab('operations')}
-          >
-            <Shield size={16} />
-            Operations Command
-          </button>
-          <button 
-            className={`nav-tab-btn ${activeTab === 'fan' ? 'active' : ''}`}
-            onClick={() => setActiveTab('fan')}
-          >
-            <User size={16} />
-            Fan Portal
-          </button>
-          <button 
-            className={`nav-tab-btn ${activeTab === 'assistant' ? 'active' : ''}`}
-            onClick={() => setActiveTab('assistant')}
-          >
-            <MessageSquare size={16} />
-            AI Assistant
-          </button>
-          <button 
-            className={`nav-tab-btn ${activeTab === 'architecture' ? 'active' : ''}`}
-            onClick={() => setActiveTab('architecture')}
-          >
-            <Cpu size={16} />
-            System Architecture
-          </button>
+        <div className="navigation-tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <button 
+              className={`nav-tab-btn ${activeTab === 'operations' ? 'active' : ''}`}
+              onClick={() => setActiveTab('operations')}
+            >
+              <Shield size={16} />
+              Operations Command
+            </button>
+            <button 
+              className={`nav-tab-btn ${activeTab === 'fan' ? 'active' : ''}`}
+              onClick={() => setActiveTab('fan')}
+            >
+              <User size={16} />
+              Fan Portal
+            </button>
+            <button 
+              className={`nav-tab-btn ${activeTab === 'assistant' ? 'active' : ''}`}
+              onClick={() => setActiveTab('assistant')}
+            >
+              <MessageSquare size={16} />
+              AI Assistant
+            </button>
+            {isDevMode && (
+              <button 
+                className={`nav-tab-btn ${activeTab === 'architecture' ? 'active' : ''}`}
+                onClick={() => setActiveTab('architecture')}
+              >
+                <Cpu size={16} />
+                System Architecture
+              </button>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.35rem 0.75rem', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
+            <span style={{ fontSize: '0.68rem', color: isDevMode ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: '700', letterSpacing: '0.5px' }}>
+              {isDevMode ? '🛠️ DEV MODE' : '👤 USER VIEW'}
+            </span>
+            <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '28px', height: '16px', margin: 0 }}>
+              <input 
+                type="checkbox" 
+                checked={isDevMode} 
+                onChange={(e) => {
+                  setIsDevMode(e.target.checked);
+                  if (!e.target.checked && activeTab === 'architecture') {
+                    setActiveTab('operations');
+                  }
+                }}
+                style={{ opacity: 0, width: 0, height: 0 }}
+              />
+              <span className="slider round" style={{
+                position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
+                background: isDevMode ? 'var(--color-primary)' : '#ccc',
+                transition: '.4s', borderRadius: '34px'
+              }}>
+                <span style={{
+                  position: 'absolute', content: '""', height: '10px', width: '10px', left: isDevMode ? '15px' : '3px', bottom: '3px',
+                  background: 'white', transition: '.4s', borderRadius: '50%'
+                }}></span>
+              </span>
+            </label>
+          </div>
         </div>
       </header>
 
@@ -1901,6 +2007,52 @@ function App() {
                       <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '0.72rem' }}>Classifies incident reports, sets priority, and assigns staff teams automatically.</span>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Stadium Ingestion Portal Widget */}
+              <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  📥 Stadium Ingestion Portal
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                  Paste a parsed JSON stadium configuration from the Gemini vision parser to dynamically register a new venue.
+                </p>
+
+                <textarea
+                  placeholder="Paste stadium JSON configuration..."
+                  style={{
+                    width: '100%',
+                    height: '110px',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: '#fff',
+                    fontSize: '0.7rem',
+                    fontFamily: 'monospace',
+                    padding: '0.5rem',
+                    resize: 'none',
+                    outline: 'none'
+                  }}
+                  value={injectedJson}
+                  onChange={(e) => setInjectedJson(e.target.value)}
+                />
+
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button 
+                    onClick={() => handleInjectStadium()} 
+                    className="btn btn-primary"
+                    style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem' }}
+                  >
+                    Inject Venue
+                  </button>
+                  <button
+                    onClick={() => handleLoadSampleJSON()}
+                    className="btn btn-secondary"
+                    style={{ padding: '0.4rem', fontSize: '0.75rem' }}
+                  >
+                    Load Sample
+                  </button>
                 </div>
               </div>
 
