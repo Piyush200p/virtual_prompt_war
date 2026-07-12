@@ -744,6 +744,34 @@ function App() {
     }
   };
 
+  const SIM_SECONDARY_METRICS = {
+    gates_open: {
+      scanRate: { value: '12.4%', trend: '+12.4% stream-in progress', status: 'up' },
+      securityWait: { value: '2.8m', trend: 'Fastest at South Gate C', status: 'down' },
+      concessions: { value: 'Low', trend: 'Avg queue: 3.1 minutes', status: 'down' }
+    },
+    match_starting: {
+      scanRate: { value: '48.2%', trend: 'Surging +28.5% scan rate', status: 'up' },
+      securityWait: { value: '18.5m', trend: 'Surging at West Gate D', status: 'up' },
+      concessions: { value: 'High', trend: 'Avg queue: 12.0 minutes', status: 'up' }
+    },
+    match_live: {
+      scanRate: { value: '96.1%', trend: 'All seats occupied', status: 'up' },
+      securityWait: { value: '1.2m', trend: 'Gates secured', status: 'down' },
+      concessions: { value: 'Moderate', trend: 'Avg queue: 4.5 minutes', status: 'down' }
+    },
+    half_time: {
+      scanRate: { value: '96.8%', trend: 'Halftime exit scans stable', status: 'up' },
+      securityWait: { value: '0.8m', trend: 'Gates secured', status: 'down' },
+      concessions: { value: 'Critical', trend: 'Avg queue: 19.8 minutes (Halftime rush)', status: 'up' }
+    },
+    crowd_exiting: {
+      scanRate: { value: '99.9%', trend: 'Event completed', status: 'down' },
+      securityWait: { value: '0.0m', trend: 'Gates open for egress', status: 'down' },
+      concessions: { value: 'Closed', trend: 'Avg queue: 0.0 minutes', status: 'down' }
+    }
+  };
+
   const [simPhase, setSimPhase] = useState(null);       // active phase key or null
   const [simTick, setSimTick] = useState(0);            // drives micro-fluctuations
   const simIntervalRef = useRef(null);
@@ -1524,7 +1552,9 @@ function App() {
                 <div className="stats-header">
                   <div>
                     <span className="stats-label">TOTAL SCAN RATE</span>
-                    <h3 className="stats-value">73.8%</h3>
+                    <h3 className="stats-value">
+                      {simPhase && SIM_SECONDARY_METRICS[simPhase] ? SIM_SECONDARY_METRICS[simPhase].scanRate.value : '73.8%'}
+                    </h3>
                   </div>
                   <div className="stats-icon-wrapper success">
                     <TrendingUp size={20} />
@@ -1532,7 +1562,9 @@ function App() {
                 </div>
                 <div className="stats-trend up">
                   <Check size={12} />
-                  <span>+4.2% scanned in last 10 mins</span>
+                  <span>
+                    {simPhase && SIM_SECONDARY_METRICS[simPhase] ? SIM_SECONDARY_METRICS[simPhase].scanRate.trend : '+4.2% scanned in last 10 mins'}
+                  </span>
                 </div>
               </div>
 
@@ -1557,14 +1589,22 @@ function App() {
                 <div className="stats-header">
                   <div>
                     <span className="stats-label">SECURITY LINE WAIT</span>
-                    <h3 className="stats-value">4.2m</h3>
+                    <h3 className="stats-value">
+                      {simPhase && SIM_SECONDARY_METRICS[simPhase] ? SIM_SECONDARY_METRICS[simPhase].securityWait.value : '4.2m'}
+                    </h3>
                   </div>
-                  <div className="stats-icon-wrapper primary">
+                  <div className={`stats-icon-wrapper ${
+                    simPhase && SIM_SECONDARY_METRICS[simPhase] 
+                      ? (SIM_SECONDARY_METRICS[simPhase].securityWait.value.includes('18') ? 'danger' : 'success')
+                      : 'primary'
+                  }`}>
                     <Clock size={20} />
                   </div>
                 </div>
-                <div className="stats-trend up">
-                  <span>Fastest at East Gate B</span>
+                <div className="stats-trend">
+                  <span style={{ color: simPhase && SIM_SECONDARY_METRICS[simPhase]?.securityWait.value.includes('18') ? 'var(--color-danger)' : 'inherit' }}>
+                    {simPhase && SIM_SECONDARY_METRICS[simPhase] ? SIM_SECONDARY_METRICS[simPhase].securityWait.trend : 'Fastest at East Gate B'}
+                  </span>
                 </div>
               </div>
 
@@ -1572,14 +1612,22 @@ function App() {
                 <div className="stats-header">
                   <div>
                     <span className="stats-label">CONCESSION CONGESTION</span>
-                    <h3 className="stats-value">Moderate</h3>
+                    <h3 className="stats-value">
+                      {simPhase && SIM_SECONDARY_METRICS[simPhase] ? SIM_SECONDARY_METRICS[simPhase].concessions.value : 'Moderate'}
+                    </h3>
                   </div>
-                  <div className="stats-icon-wrapper warning">
+                  <div className={`stats-icon-wrapper ${
+                    simPhase && SIM_SECONDARY_METRICS[simPhase]
+                      ? (SIM_SECONDARY_METRICS[simPhase].concessions.value === 'Critical' ? 'danger' : SIM_SECONDARY_METRICS[simPhase].concessions.value === 'High' ? 'warning' : 'success')
+                      : 'warning'
+                  }`}>
                     <Coffee size={20} />
                   </div>
                 </div>
                 <div className="stats-trend">
-                  <span>Avg queue: 8.5 minutes</span>
+                  <span style={{ color: simPhase && SIM_SECONDARY_METRICS[simPhase]?.concessions.value === 'Critical' ? 'var(--color-danger)' : 'inherit' }}>
+                    {simPhase && SIM_SECONDARY_METRICS[simPhase] ? SIM_SECONDARY_METRICS[simPhase].concessions.trend : 'Avg queue: 8.5 minutes'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1607,28 +1655,108 @@ function App() {
                 </div>
               </div>
 
-              {/* Phase Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem', marginBottom: simPhase ? '1rem' : 0 }}>
-                {Object.entries(SIM_PHASES).map(([key, phase]) => (
-                  <button
-                    key={key}
-                    onClick={() => { setSimPhase(key); setSimTick(0); }}
-                    style={{
-                      background: simPhase === key ? `rgba(59,130,246,0.15)` : 'var(--bg-tertiary)',
-                      border: `1.5px solid ${simPhase === key ? phase.color : 'var(--border-color)'}`,
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '0.75rem 0.5rem',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      transition: 'all 0.25s ease',
-                      boxShadow: simPhase === key ? `0 0 16px ${phase.color}40` : 'none',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem'
-                    }}
-                  >
-                    <span style={{ fontSize: '1.4rem' }}>{phase.icon}</span>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: simPhase === key ? '#fff' : 'var(--text-secondary)', lineHeight: 1.2 }}>{phase.label}</span>
-                  </button>
-                ))}
+              {/* Stepped Progress Timeline Layout */}
+              <div style={{ padding: '0.5rem 1rem 1.5rem 1rem', position: 'relative', overflowX: 'auto' }}>
+                <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minWidth: '450px', padding: '1.25rem 0' }}>
+                  
+                  {/* Background Track Line */}
+                  <div style={{ 
+                    position: 'absolute', 
+                    left: '40px', 
+                    right: '40px', 
+                    height: '4px', 
+                    background: 'var(--border-color)', 
+                    top: '32px', 
+                    zIndex: 1,
+                    borderRadius: '2px'
+                  }} />
+
+                  {/* Active Progress Line */}
+                  {(() => {
+                    const keys = Object.keys(SIM_PHASES);
+                    const activeIndex = simPhase ? keys.indexOf(simPhase) : -1;
+                    const progressPercent = activeIndex >= 0 ? (activeIndex / (keys.length - 1)) * 100 : 0;
+                    const activeColor = simPhase ? SIM_PHASES[simPhase].color : 'var(--color-primary)';
+                    return (
+                      <div style={{
+                        position: 'absolute',
+                        left: '40px',
+                        width: `calc(${progressPercent}% - 40px)`,
+                        height: '4px',
+                        background: activeColor,
+                        top: '32px',
+                        zIndex: 2,
+                        borderRadius: '2px',
+                        boxShadow: `0 0 10px ${activeColor}`,
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }} />
+                    );
+                  })()}
+
+                  {/* Stepped Nodes */}
+                  {Object.entries(SIM_PHASES).map(([key, phase], idx) => {
+                    const keys = Object.keys(SIM_PHASES);
+                    const activeIndex = simPhase ? keys.indexOf(simPhase) : -1;
+                    const isActive = simPhase === key;
+                    const isCompleted = activeIndex > idx;
+                    
+                    const nodeBorderColor = isActive ? phase.color : isCompleted ? 'var(--color-primary)' : 'var(--border-color)';
+                    const nodeBgColor = isActive 
+                      ? phase.color 
+                      : isCompleted 
+                        ? 'rgba(56, 189, 248, 0.12)' 
+                        : 'var(--bg-secondary)';
+                        
+                    return (
+                      <div 
+                        key={key} 
+                        style={{ 
+                          zIndex: 3, 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          alignItems: 'center', 
+                          position: 'relative',
+                          width: '90px'
+                        }}
+                      >
+                        <button
+                          onClick={() => { setSimPhase(key); setSimTick(0); }}
+                          className={isActive ? "simulation-node-active" : "simulation-node"}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: nodeBgColor,
+                            border: `2px solid ${nodeBorderColor}`,
+                            color: isActive ? '#ffffff' : isCompleted ? 'var(--color-primary)' : 'var(--text-secondary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: isActive ? `0 0 15px ${phase.color}` : 'none',
+                            fontSize: '1.25rem'
+                          }}
+                        >
+                          {phase.icon}
+                        </button>
+                        
+                        <div style={{
+                          marginTop: '0.6rem',
+                          fontSize: '0.72rem',
+                          fontWeight: isActive || isCompleted ? '700' : '500',
+                          color: isActive ? phase.color : isCompleted ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.2s ease'
+                        }}>
+                          {phase.label}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                </div>
               </div>
 
               {/* Active Phase Status Banner */}

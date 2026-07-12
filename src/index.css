@@ -504,6 +504,21 @@ body {
   50% { opacity: 1; transform: scale(1.25); }
 }
 
+.simulation-node-active {
+  animation: node-pulse-glow 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes node-pulse-glow {
+  0% {
+    box-shadow: 0 0 4px currentColor, inset 0 0 2px rgba(255, 255, 255, 0.4);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 16px currentColor, inset 0 0 8px rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+  }
+}
+
 /* Interactive Gate Markers */
 .gate-marker {
   transition: all 0.3s ease;
