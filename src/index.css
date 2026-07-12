@@ -443,34 +443,65 @@ body {
 }
 
 .stadium-sector {
-  fill: #1f2a45;
-  stroke: rgba(255, 255, 255, 0.15);
-  stroke-width: 2;
+  fill: rgba(30, 41, 59, 0.35);
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1.5;
   cursor: pointer;
-  transition: fill 0.3s, stroke 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stadium-sector:hover {
   stroke: #ffffff;
-  filter: brightness(1.2);
+  filter: brightness(1.2) drop-shadow(0 0 6px currentColor);
 }
 
 .sector-selected {
   stroke: var(--color-primary) !important;
-  stroke-width: 3px !important;
-  filter: drop-shadow(0 0 10px var(--color-primary));
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 8px var(--color-primary));
 }
 
 .sector-high {
-  fill: rgba(239, 68, 68, 0.7) !important; /* Crimson danger */
+  fill: rgba(239, 68, 68, 0.22) !important;
+  stroke: #ef4444 !important;
+  color: #ef4444;
+  filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.35));
+  animation: sector-pulse-high 2.5s infinite alternate ease-in-out;
 }
 
 .sector-medium {
-  fill: rgba(245, 158, 11, 0.7) !important; /* Orange warning */
+  fill: rgba(245, 158, 11, 0.18) !important;
+  stroke: #f59e0b !important;
+  color: #f59e0b;
+  filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.25));
 }
 
 .sector-low {
-  fill: rgba(16, 185, 129, 0.6) !important; /* Green success */
+  fill: rgba(16, 185, 129, 0.12) !important;
+  stroke: #10b981 !important;
+  color: #10b981;
+  filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.18));
+}
+
+@keyframes sector-pulse-high {
+  0% {
+    fill: rgba(239, 68, 68, 0.18);
+    filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.3));
+  }
+  100% {
+    fill: rgba(239, 68, 68, 0.30);
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.55));
+  }
+}
+
+.incident-dot-pulse {
+  animation: alarm-pulse-dot 1.2s infinite;
+  display: inline-block;
+}
+
+@keyframes alarm-pulse-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.25); }
 }
 
 /* Interactive Gate Markers */

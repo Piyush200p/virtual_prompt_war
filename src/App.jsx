@@ -87,6 +87,39 @@ const formatMatchInitials = (matchStr) => {
   return matchStr;
 };
 
+const renderDispatcherSparkline = (data, color) => {
+  const width = 60;
+  const height = 18;
+  const padding = 2;
+  const max = Math.max(...data) || 1;
+  const min = Math.min(...data) || 0;
+  
+  const points = data.map((val, idx) => {
+    const x = padding + (idx / (data.length - 1)) * (width - padding * 2);
+    const y = height - padding - ((val - min) / (max - min)) * (height - padding * 2);
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <svg width={width} height={height} style={{ overflow: 'visible', filter: `drop-shadow(0 0 3px ${color}80)` }}>
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+      <circle
+        cx={padding + (data.length - 1) * (width - padding * 2) / (data.length - 1)}
+        cy={height - padding - ((data[data.length - 1] - min) / (max - min)) * (height - padding * 2)}
+        r="2"
+        fill={color}
+      />
+    </svg>
+  );
+};
+
 // Dynamic Stadium Outline and Playing Field visual elements based on sport & venue
 const renderStadiumMapElements = (stadiumId, isFanView = false) => {
   const pitchColor = isFanView ? "rgba(10, 61, 46, 0.85)" : "rgba(4, 120, 87, 0.85)";
@@ -328,6 +361,8 @@ function App() {
   const [isDevMode, setIsDevMode] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [injectedJson, setInjectedJson] = useState('');
+  const [hoveredSector, setHoveredSector] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [stadiumsRegistry, setStadiumsRegistry] = useState(STADIUM_CONFIGS);
   
   // New State variables for FIFA 2026 Enhancements
@@ -351,6 +386,14 @@ function App() {
 
   const handleLoadSampleJSON = () => {
     setInjectedJson(sampleStadiumJSON);
+  };
+
+  const handleMapMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
   };
 
   const handleInjectStadium = () => {
@@ -1632,8 +1675,25 @@ function App() {
                   </div>
                 </div>
 
-                <div className="map-visualizer">
-                  <svg className="stadium-svg" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div className="map-visualizer" style={{ position: 'relative' }}>
+                  <svg 
+                    className="stadium-svg" 
+                    viewBox="0 0 400 300" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    onMouseMove={handleMapMouseMove}
+                  >
+                    <defs>
+                      {/* Grid Pattern overlay for tactical HUD look */}
+                      <pattern id="tacticalGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+                        <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="0.5" />
+                        <circle cx="0" cy="0" r="0.75" fill="rgba(255, 255, 255, 0.15)" />
+                      </pattern>
+                    </defs>
+
+                    {/* Tactical Blueprint Grid Background */}
+                    <rect width="400" height="300" fill="url(#tacticalGrid)" rx="10" pointerEvents="none" />
+                    
                     {/* Dynamic Stadium Background & Playing Field */}
                     {renderStadiumMapElements(currentStadiumId, false)}
                     
@@ -1642,6 +1702,8 @@ function App() {
                       className={`stadium-sector ${selectedSector === 'North Stand' ? 'sector-selected' : ''} ${simulatedSectorData['North Stand'].colorClass}`}
                       d="M100 25 C150 18, 250 18, 300 25 L260 90 C230 85, 170 85, 140 90 Z" 
                       onClick={() => setSelectedSector('North Stand')}
+                      onMouseEnter={() => setHoveredSector('North Stand')}
+                      onMouseLeave={() => setHoveredSector(null)}
                     />
                     
                     {/* East Stand Sector */}
@@ -1649,6 +1711,8 @@ function App() {
                       className={`stadium-sector ${selectedSector === 'East Stand' ? 'sector-selected' : ''} ${simulatedSectorData['East Stand'].colorClass}`}
                       d="M305 32 C375 75, 375 225, 305 268 L265 198 C280 178, 280 122, 265 102 Z" 
                       onClick={() => setSelectedSector('East Stand')}
+                      onMouseEnter={() => setHoveredSector('East Stand')}
+                      onMouseLeave={() => setHoveredSector(null)}
                     />
 
                     {/* South Stand Sector */}
@@ -1656,6 +1720,8 @@ function App() {
                       className={`stadium-sector ${selectedSector === 'South Stand' ? 'sector-selected' : ''} ${simulatedSectorData['South Stand'].colorClass}`}
                       d="M100 275 C150 282, 250 282, 300 275 L260 210 C230 215, 170 215, 140 210 Z" 
                       onClick={() => setSelectedSector('South Stand')}
+                      onMouseEnter={() => setHoveredSector('South Stand')}
+                      onMouseLeave={() => setHoveredSector(null)}
                     />
 
                     {/* West Stand Sector */}
@@ -1663,6 +1729,8 @@ function App() {
                       className={`stadium-sector ${selectedSector === 'West Stand' ? 'sector-selected' : ''} ${simulatedSectorData['West Stand'].colorClass}`}
                       d="M95 32 C25 75, 25 225, 95 268 L135 198 C120 178, 120 122, 135 102 Z" 
                       onClick={() => setSelectedSector('West Stand')}
+                      onMouseEnter={() => setHoveredSector('West Stand')}
+                      onMouseLeave={() => setHoveredSector(null)}
                     />
 
                     {/* Interactive Gate Markers */}
@@ -1706,6 +1774,47 @@ function App() {
                       </g>
                     ))}
                   </svg>
+
+                  {/* Interactive sector tooltip overlay */}
+                  {hoveredSector && simulatedSectorData[hoveredSector] && (
+                    <div 
+                      style={{ 
+                        position: 'absolute', 
+                        left: `${tooltipPos.x + 15}px`, 
+                        top: `${tooltipPos.y + 15}px`, 
+                        pointerEvents: 'none',
+                        zIndex: 1000,
+                        background: 'rgba(10, 13, 20, 0.92)',
+                        border: `1px solid ${simulatedSectorData[hoveredSector].colorClass === 'sector-high' ? 'var(--color-danger)' : simulatedSectorData[hoveredSector].colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)'}`,
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.05)',
+                        borderRadius: '6px',
+                        padding: '0.6rem 0.8rem',
+                        fontSize: '0.72rem',
+                        minWidth: '160px',
+                        backdropFilter: 'blur(8px)',
+                        transition: 'left 0.1s ease-out, top 0.1s ease-out',
+                        fontFamily: 'var(--sans)'
+                      }}
+                    >
+                      <div style={{ fontWeight: '800', color: 'var(--text-primary)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '0.25rem', marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{hoveredSector}</span>
+                        <span style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(224, 159, 62, 0.12)', padding: '0.05rem 0.25rem', borderRadius: '3px', fontFamily: 'var(--mono)', letterSpacing: '0.5px' }}>TELEMETRY</span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 0.5rem', color: 'var(--text-secondary)' }}>
+                        <span>Density:</span>
+                        <span style={{ fontWeight: '800', color: simulatedSectorData[hoveredSector].colorClass === 'sector-high' ? 'var(--color-danger)' : simulatedSectorData[hoveredSector].colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)' }}>{simulatedSectorData[hoveredSector].density}</span>
+                        
+                        <span>Status:</span>
+                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{simulatedSectorData[hoveredSector].status}</span>
+                        
+                        <span>Security:</span>
+                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{simulatedSectorData[hoveredSector].security}</span>
+
+                        <span>Climate:</span>
+                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{simulatedSectorData[hoveredSector].temp}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="sector-legend">
@@ -1872,38 +1981,147 @@ function App() {
 
                 {/* Incidents Feed */}
                 <div>
-                  <h3 style={{ fontSize: '0.85rem', marginBottom: '0.75rem', fontWeight: 600 }}>Active Incident Logs</h3>
-                  <div className="incident-feed-list">
-                    {incidents.map((incident) => (
-                      <div key={incident.id} className="incident-item">
-                        <div className="incident-item-header">
-                          <span className="incident-loc">{incident.location}</span>
-                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{incident.timestamp}</span>
-                            <span className={`incident-badge badge-${incident.priority}`}>
-                              {incident.priority}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="incident-desc">{incident.description}</p>
-                        
-                        {/* Auto Dispatch display */}
-                        <div className="incident-dispatch-box">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                            <span style={{ fontWeight: '700', color: 'var(--color-primary)' }}>AUTO-DISPATCH LOG</span>
-                            <span style={{ color: 'var(--text-secondary)' }}>Category: **{incident.category}**</span>
-                          </div>
-                          <div>
-                            <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: '500' }}>Assigned Crew: </span>
-                            <span className="dispatch-staff">{incident.dispatch.staff}</span>
-                          </div>
-                          <div>
-                            <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: '500' }}>Directives: </span>
-                            <span className="dispatch-instruction">{incident.dispatch.instruction}</span>
-                          </div>
-                        </div>
+                  <h3 style={{ fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Incident Volume Trends
+                  </h3>
+                  
+                  {/* Telemetry Trends / Sparklines Grid */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr 1fr', 
+                    gap: '0.5rem', 
+                    background: 'rgba(0, 0, 0, 0.25)', 
+                    padding: '0.6rem 0.75rem', 
+                    borderRadius: 'var(--radius-sm)', 
+                    border: '1px solid var(--border-color)', 
+                    marginBottom: '1rem'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                      <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: '700', letterSpacing: '0.3px' }}>CROWD SAFETY</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', margin: '0.1rem 0' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--color-danger)' }}>4/m</span>
+                        {renderDispatcherSparkline([2, 5, 3, 6, 4], '#ef4444')}
                       </div>
-                    ))}
+                      <span style={{ fontSize: '0.55rem', color: '#ef4444', fontWeight: '700', letterSpacing: '0.2px' }}>● CRITICAL TREND</span>
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                      <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: '700', letterSpacing: '0.3px' }}>TICKET ACCESS</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', margin: '0.1rem 0' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--color-warning)' }}>2/m</span>
+                        {renderDispatcherSparkline([1, 2, 2, 4, 2], '#f59e0b')}
+                      </div>
+                      <span style={{ fontSize: '0.55rem', color: '#f59e0b', fontWeight: '700', letterSpacing: '0.2px' }}>▲ WARNING TREND</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                      <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: '700', letterSpacing: '0.3px' }}>FACILITIES</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', margin: '0.1rem 0' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: '800', color: '#60a5fa' }}>1/m</span>
+                        {renderDispatcherSparkline([0, 1, 0, 1, 1], '#60a5fa')}
+                      </div>
+                      <span style={{ fontSize: '0.55rem', color: '#60a5fa', fontWeight: '700', letterSpacing: '0.2px' }}>■ NORMAL LEVEL</span>
+                    </div>
+                  </div>
+
+                  <h3 style={{ fontSize: '0.85rem', marginBottom: '0.75rem', fontWeight: 600 }}>Active Incident Logs</h3>
+                  <div className="incident-feed-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {incidents.map((incident) => {
+                      // Map priority -> Severity values and styling colors
+                      let severityLabel = 'Info';
+                      let severityColor = '#60a5fa';
+                      let severityBg = 'rgba(96, 165, 250, 0.1)';
+                      let severityDot = '■';
+                      
+                      if (incident.priority === 'high') {
+                        severityLabel = 'Critical';
+                        severityColor = 'var(--color-danger)';
+                        severityBg = 'rgba(239, 68, 68, 0.1)';
+                        severityDot = '●';
+                      } else if (incident.priority === 'medium') {
+                        severityLabel = 'Warning';
+                        severityColor = 'var(--color-warning)';
+                        severityBg = 'rgba(245, 158, 11, 0.1)';
+                        severityDot = '▲';
+                      }
+
+                      return (
+                        <div 
+                          key={incident.id} 
+                          className="incident-item"
+                          style={{
+                            background: 'rgba(7, 9, 14, 0.45)',
+                            border: '1px solid var(--border-color)',
+                            borderLeft: `4px solid ${severityColor}`,
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0.75rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                            position: 'relative',
+                            transition: 'all 0.25s ease'
+                          }}
+                        >
+                          <div className="incident-item-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span className="incident-loc" style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                              {incident.location}
+                            </span>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'var(--mono)' }}>{incident.timestamp}</span>
+                              <span style={{ 
+                                fontSize: '0.62rem', 
+                                fontWeight: '700', 
+                                textTransform: 'uppercase',
+                                padding: '0.15rem 0.5rem', 
+                                borderRadius: '4px',
+                                border: `1px solid ${severityColor}40`,
+                                background: severityBg,
+                                color: severityColor,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                letterSpacing: '0.5px'
+                              }}>
+                                <span className={incident.priority === 'high' ? 'incident-dot-pulse' : ''} style={{ color: severityColor, fontSize: '0.55rem', lineHeight: 1 }}>{severityDot}</span>
+                                {severityLabel}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <p className="incident-desc" style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.4', margin: 0 }}>
+                            {incident.description}
+                          </p>
+                          
+                          {/* Structured Auto Dispatch display */}
+                          <div 
+                            className="incident-dispatch-box"
+                            style={{
+                              background: 'rgba(0, 0, 0, 0.3)',
+                              borderRadius: '4px',
+                              padding: '0.6rem',
+                              border: '1px dashed rgba(255,255,255,0.06)',
+                              fontSize: '0.72rem',
+                              fontFamily: 'var(--mono)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.25rem'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>
+                              <span style={{ fontWeight: '800', color: 'var(--color-primary)', letterSpacing: '0.5px' }}>⚡ AUTO-DISPATCH FEED</span>
+                              <span style={{ color: '#94a3b8' }}>Category: {incident.category}</span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '0.2rem' }}>
+                              <span style={{ color: '#94a3b8', fontWeight: '600' }}>CREW:</span>
+                              <span style={{ color: 'var(--text-primary)', fontWeight: '700' }} className="dispatch-staff">{incident.dispatch.staff}</span>
+                              
+                              <span style={{ color: '#94a3b8', fontWeight: '600' }}>SOP DIR:</span>
+                              <span style={{ color: '#e2e8f0', lineHeight: 1.3 }} className="dispatch-instruction">{incident.dispatch.instruction}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
             </div>
