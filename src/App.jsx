@@ -1784,7 +1784,7 @@ function App() {
                         top: `${tooltipPos.y + 15}px`, 
                         pointerEvents: 'none',
                         zIndex: 1000,
-                        background: 'rgba(10, 13, 20, 0.92)',
+                        background: 'rgba(10, 13, 20, 0.95)',
                         border: `1px solid ${simulatedSectorData[hoveredSector].colorClass === 'sector-high' ? 'var(--color-danger)' : simulatedSectorData[hoveredSector].colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)'}`,
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.05)',
                         borderRadius: '6px',
@@ -1796,22 +1796,22 @@ function App() {
                         fontFamily: 'var(--sans)'
                       }}
                     >
-                      <div style={{ fontWeight: '800', color: 'var(--text-primary)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '0.25rem', marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ fontWeight: '800', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '0.25rem', marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>{hoveredSector}</span>
                         <span style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(224, 159, 62, 0.12)', padding: '0.05rem 0.25rem', borderRadius: '3px', fontFamily: 'var(--mono)', letterSpacing: '0.5px' }}>TELEMETRY</span>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 0.5rem', color: 'var(--text-secondary)' }}>
-                        <span>Density:</span>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 0.5rem', color: '#94a3b8' }}>
+                        <span style={{ color: '#94a3b8' }}>Density:</span>
                         <span style={{ fontWeight: '800', color: simulatedSectorData[hoveredSector].colorClass === 'sector-high' ? 'var(--color-danger)' : simulatedSectorData[hoveredSector].colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)' }}>{simulatedSectorData[hoveredSector].density}</span>
                         
-                        <span>Status:</span>
-                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{simulatedSectorData[hoveredSector].status}</span>
+                        <span style={{ color: '#94a3b8' }}>Status:</span>
+                        <span style={{ fontWeight: '600', color: '#f8fafc' }}>{simulatedSectorData[hoveredSector].status}</span>
                         
-                        <span>Security:</span>
-                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{simulatedSectorData[hoveredSector].security}</span>
+                        <span style={{ color: '#94a3b8' }}>Security:</span>
+                        <span style={{ fontWeight: '600', color: '#f8fafc' }}>{simulatedSectorData[hoveredSector].security}</span>
 
-                        <span>Climate:</span>
-                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{simulatedSectorData[hoveredSector].temp}</span>
+                        <span style={{ color: '#94a3b8' }}>Climate:</span>
+                        <span style={{ fontWeight: '600', color: '#f8fafc' }}>{simulatedSectorData[hoveredSector].temp}</span>
                       </div>
                     </div>
                   )}
@@ -1990,14 +1990,14 @@ function App() {
                     display: 'grid', 
                     gridTemplateColumns: '1fr 1fr 1fr', 
                     gap: '0.5rem', 
-                    background: 'rgba(0, 0, 0, 0.25)', 
+                    background: 'var(--bg-tertiary)', 
                     padding: '0.6rem 0.75rem', 
                     borderRadius: 'var(--radius-sm)', 
                     border: '1px solid var(--border-color)', 
                     marginBottom: '1rem'
                   }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                      <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: '700', letterSpacing: '0.3px' }}>CROWD SAFETY</span>
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', letterSpacing: '0.3px' }}>CROWD SAFETY</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', margin: '0.1rem 0' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--color-danger)' }}>4/m</span>
                         {renderDispatcherSparkline([2, 5, 3, 6, 4], '#ef4444')}
@@ -2006,7 +2006,7 @@ function App() {
                     </div>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                      <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: '700', letterSpacing: '0.3px' }}>TICKET ACCESS</span>
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', letterSpacing: '0.3px' }}>TICKET ACCESS</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', margin: '0.1rem 0' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--color-warning)' }}>2/m</span>
                         {renderDispatcherSparkline([1, 2, 2, 4, 2], '#f59e0b')}
@@ -2015,7 +2015,7 @@ function App() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                      <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: '700', letterSpacing: '0.3px' }}>FACILITIES</span>
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', letterSpacing: '0.3px' }}>FACILITIES</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', margin: '0.1rem 0' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: '800', color: '#60a5fa' }}>1/m</span>
                         {renderDispatcherSparkline([0, 1, 0, 1, 1], '#60a5fa')}
@@ -2050,7 +2050,7 @@ function App() {
                           key={incident.id} 
                           className="incident-item"
                           style={{
-                            background: 'rgba(7, 9, 14, 0.45)',
+                            background: 'var(--bg-secondary)',
                             border: '1px solid var(--border-color)',
                             borderLeft: `4px solid ${severityColor}`,
                             borderRadius: 'var(--radius-sm)',
@@ -2067,7 +2067,7 @@ function App() {
                               {incident.location}
                             </span>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'var(--mono)' }}>{incident.timestamp}</span>
+                              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--mono)' }}>{incident.timestamp}</span>
                               <span style={{ 
                                 fontSize: '0.62rem', 
                                 fontWeight: '700', 
@@ -2088,7 +2088,7 @@ function App() {
                             </div>
                           </div>
                           
-                          <p className="incident-desc" style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.4', margin: 0 }}>
+                          <p className="incident-desc" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', opacity: 0.9, lineHeight: '1.4', margin: 0 }}>
                             {incident.description}
                           </p>
                           
@@ -2096,10 +2096,10 @@ function App() {
                           <div 
                             className="incident-dispatch-box"
                             style={{
-                              background: 'rgba(0, 0, 0, 0.3)',
+                              background: 'var(--bg-tertiary)',
                               borderRadius: '4px',
                               padding: '0.6rem',
-                              border: '1px dashed rgba(255,255,255,0.06)',
+                              border: '1px dashed var(--border-color)',
                               fontSize: '0.72rem',
                               fontFamily: 'var(--mono)',
                               display: 'flex',
@@ -2107,16 +2107,16 @@ function App() {
                               gap: '0.25rem'
                             }}
                           >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.25rem', marginBottom: '0.25rem' }}>
                               <span style={{ fontWeight: '800', color: 'var(--color-primary)', letterSpacing: '0.5px' }}>⚡ AUTO-DISPATCH FEED</span>
-                              <span style={{ color: '#94a3b8' }}>Category: {incident.category}</span>
+                              <span style={{ color: 'var(--text-secondary)' }}>Category: {incident.category}</span>
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '0.2rem' }}>
-                              <span style={{ color: '#94a3b8', fontWeight: '600' }}>CREW:</span>
+                              <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>CREW:</span>
                               <span style={{ color: 'var(--text-primary)', fontWeight: '700' }} className="dispatch-staff">{incident.dispatch.staff}</span>
                               
-                              <span style={{ color: '#94a3b8', fontWeight: '600' }}>SOP DIR:</span>
-                              <span style={{ color: '#e2e8f0', lineHeight: 1.3 }} className="dispatch-instruction">{incident.dispatch.instruction}</span>
+                              <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>SOP DIR:</span>
+                              <span style={{ color: 'var(--text-primary)', lineHeight: 1.3 }} className="dispatch-instruction">{incident.dispatch.instruction}</span>
                             </div>
                           </div>
                         </div>
