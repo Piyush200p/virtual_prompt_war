@@ -1701,11 +1701,7 @@ function App() {
                     const isCompleted = activeIndex > idx;
                     
                     const nodeBorderColor = isActive ? phase.color : isCompleted ? 'var(--color-primary)' : 'var(--border-color)';
-                    const nodeBgColor = isActive 
-                      ? phase.color 
-                      : isCompleted 
-                        ? 'rgba(56, 189, 248, 0.12)' 
-                        : 'var(--bg-secondary)';
+                    const nodeBgColor = 'var(--bg-tertiary)';
                         
                     return (
                       <div 
