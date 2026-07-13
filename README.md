@@ -3,8 +3,8 @@
 
 **ArenaFlow AI** is a cutting-edge, dual-portal Generative AI control center and wayfinding assistant designed to optimize stadium operations and elevate the fan experience during the FIFA World Cup 2026. 
 
-Live Demo/Deployment: **[Deploy Link Placeholder - update upon deployment]**  
-GitHub Repository: **[GitHub Link Placeholder - update upon push]**
+Live Demo/Deployment: **[https://piyush200p.github.io/virtual_prompt_war/](https://piyush200p.github.io/virtual_prompt_war/)**  
+GitHub Repository: **[https://github.com/Piyush200p/virtual_prompt_war](https://github.com/Piyush200p/virtual_prompt_war)**
 
 ---
 
