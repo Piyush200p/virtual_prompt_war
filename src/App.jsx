@@ -818,30 +818,283 @@ function App() {
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Synchronize AI greeting with selected stadium context
+  // Split-Pane Intelligence Feed State
+  const [intelFeedFilter, setIntelFeedFilter] = useState('all');
+  const [insights, setInsights] = useState([
+    {
+      id: 1,
+      type: 'verified',
+      category: 'Security',
+      timestamp: '19:58',
+      message: 'Gate 3 ticket scan queue has normalized. Current throughput is 120 scans/min.',
+      source: 'CCTV-AI Feed 14',
+      icon: 'ShieldCheck'
+    },
+    {
+      id: 2,
+      type: 'speculative',
+      category: 'Crowd Control',
+      timestamp: '20:01',
+      message: 'Sector 124 entrance predicted to exceed capacity in 8 minutes if current flow rate persists.',
+      source: 'Predictive Flow Model',
+      icon: 'TrendingUp'
+    },
+    {
+      id: 3,
+      type: 'verified',
+      category: 'Facilities',
+      timestamp: '19:52',
+      message: 'Water pressure in North Stand corridor fully restored after valve adjustment.',
+      source: 'IoT sensor F-12',
+      icon: 'Activity'
+    },
+    {
+      id: 4,
+      type: 'speculative',
+      category: 'Concessions',
+      timestamp: '20:03',
+      message: 'Halftime pre-order surge predicted for Concession Stall #3. Peak queue may reach 22 minutes.',
+      source: 'Demand Forecast Model',
+      icon: 'Coffee'
+    },
+    {
+      id: 5,
+      type: 'verified',
+      category: 'Transportation',
+      timestamp: '20:00',
+      message: 'Eco-Shuttle Bus wave 4 dispatched to Gate B hub (12 buses active).',
+      source: 'Transit API Integration',
+      icon: 'Navigation'
+    },
+    {
+      id: 6,
+      type: 'speculative',
+      category: 'Weather',
+      timestamp: '20:04',
+      message: 'Atmospheric telemetry suggests light surface moisture (15% probability) near end of match.',
+      source: 'Meteorological AI Node',
+      icon: 'CloudRain'
+    }
+  ]);
+
+  // Synchronize AI greeting with selected stadium context for operations coordinator
   useEffect(() => {
     setMessages([
       {
         sender: 'ai',
-        text: `🏟️ Welcome ${activeStadium.ticket.holder}! I am **ArenaFlow Assistant**, your AI coordinator for ${activeStadium.name}. \n\nI have retrieved your smart ticket for **${activeStadium.currentMatch}**. I can guide you to your seat at **${activeStadium.ticket.seat.split(',')[0]}**, recommend low-wait food concessions, or report any operational issues. What can I assist you with?`,
-        reasoning: `System prompt injected fan context (${activeStadium.ticket.holder}, ${activeStadium.ticket.seat}, Gate: ${activeStadium.ticket.gate}, Match: ${activeStadium.currentMatch}).`
+        text: `🛡️ **Stadium Operations Console Online.** I am **ArenaFlow AI**, your real-time operations coordinator for **${activeStadium.name}** during the match **${activeStadium.currentMatch}**.\n\nUse the persistent **Live Intelligence Feed** on the left to track verified events (Emerald) and predictive/speculative risks (Amber).\n\nChoose from the context-aware **Actionable Chips** above the input bar to quickly trigger tactical protocols.`,
+        reasoning: `Initialized operations assistant context for ${activeStadium.name} and match ${activeStadium.currentMatch}.`
       }
     ]);
   }, [currentStadiumId]);
+
+  // Dynamically append new insights based on active simulation phase
+  useEffect(() => {
+    if (!simPhase) return;
+    
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let newInsights = [];
+    
+    switch (simPhase) {
+      case 'gates_open':
+        newInsights = [
+          {
+            id: Date.now() + 1,
+            type: 'verified',
+            category: 'Security',
+            timestamp,
+            message: 'All turnstiles active. East gate B scanning efficiency stable at 98.4%.',
+            source: 'CCTV-AI Feed 22',
+            icon: 'ShieldCheck'
+          },
+          {
+            id: Date.now() + 2,
+            type: 'speculative',
+            category: 'Crowd Flow',
+            timestamp,
+            message: 'Transit shuttle surge: 450 arriving passengers predicted at South Gate C queue within 5 mins.',
+            source: 'Egress Predictive Analytics',
+            icon: 'TrendingUp'
+          }
+        ];
+        break;
+      case 'match_starting':
+        newInsights = [
+          {
+            id: Date.now() + 3,
+            type: 'verified',
+            category: 'Operations',
+            timestamp,
+            message: 'Pitch floodlight grid verified at 100% illumination capacity.',
+            source: 'System Diagnostics',
+            icon: 'Activity'
+          },
+          {
+            id: Date.now() + 4,
+            type: 'speculative',
+            category: 'Security',
+            timestamp,
+            message: 'Late arrival cluster detected at West Corridor. Peak queue wait time might hit 18 mins.',
+            source: 'Flow Diagnostics AI',
+            icon: 'AlertTriangle'
+          }
+        ];
+        break;
+      case 'match_live':
+        newInsights = [
+          {
+            id: Date.now() + 5,
+            type: 'verified',
+            category: 'Safety',
+            timestamp,
+            message: 'Pitch boundary perimeter security sensors engaged. Zero unauthorized entries.',
+            source: 'Perimeter Array Node 3',
+            icon: 'ShieldCheck'
+          },
+          {
+            id: Date.now() + 6,
+            type: 'speculative',
+            category: 'Concessions',
+            timestamp,
+            message: 'Pre-halftime order spikes detected. Mobile ordering server load predicted to surge by 40%.',
+            source: 'Demand Analytics Engine',
+            icon: 'Coffee'
+          }
+        ];
+        break;
+      case 'half_time':
+        newInsights = [
+          {
+            id: Date.now() + 7,
+            type: 'verified',
+            category: 'Concessions',
+            timestamp,
+            message: '1,200 mobile concessions orders processed. Peak queue wait time is 4.8m.',
+            source: 'POS API Stream',
+            icon: 'Coffee'
+          },
+          {
+            id: Date.now() + 8,
+            type: 'speculative',
+            category: 'Crowd Flow',
+            timestamp,
+            message: 'Halftime egress: Sector 124 to central corridor bottleneck probability is high (84%).',
+            source: 'Crowd Flow Simulator',
+            icon: 'TrendingUp'
+          }
+        ];
+        break;
+      case 'crowd_exiting':
+        newInsights = [
+          {
+            id: Date.now() + 9,
+            type: 'verified',
+            category: 'Operations',
+            timestamp,
+            message: 'Egress flow activated. Gates A through F opened. Light transit shuttle dispatching.',
+            source: 'Gate Sensor Array',
+            icon: 'Navigation'
+          },
+          {
+            id: Date.now() + 10,
+            type: 'speculative',
+            category: 'Transportation',
+            timestamp,
+            message: 'Egress rush: Rideshare surge pricing expected. Recommend redirecting users to rail platform.',
+            source: 'Transit Demand Model',
+            icon: 'AlertTriangle'
+          }
+        ];
+        break;
+      default:
+        break;
+    }
+    
+    if (newInsights.length > 0) {
+      setInsights(prev => {
+        // Filter out any older items that have the exact same message to avoid spam
+        const filtered = prev.filter(ins => !newInsights.some(n => n.message === ins.message));
+        return [...newInsights, ...filtered];
+      });
+    }
+  }, [simPhase]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  // Contextual chips helper
+  const getContextualChips = (phase) => {
+    switch (phase) {
+      case 'gates_open':
+        return ['Deploy Volunteers to Gate B', 'Gate Wait Time Scan', 'Draft Opening Brief'];
+      case 'match_starting':
+        return ['Optimize Security Deployment', 'Open Auxiliary Lanes', 'Analyze Ticket Congestion'];
+      case 'match_live':
+        return ['Tactical Personnel Re-allocation', 'Track VIP Arrivals', 'Verify Crowd Telemetry'];
+      case 'half_time':
+        return ['Deploy Concession Vouchers', 'Redirect Corridor Traffic', 'Draft Incident Report'];
+      case 'crowd_exiting':
+        return ['Optimize Shuttle Dispatch', 'Open Exit Gates A-D', 'Draft Post-Event Summary'];
+      default:
+        return ['Draft Incident Report', 'Optimize Security Deployment', 'Analyze Stadium Safety', 'Check Vol Task Status'];
+    }
+  };
 
+  // Helper to map string icon names to Lucide icons
+  const renderInsightIcon = (iconName) => {
+    switch (iconName) {
+      case 'Shield':
+      case 'ShieldCheck':
+        return <Shield size={14} />;
+      case 'TrendingUp':
+        return <TrendingUp size={14} />;
+      case 'Activity':
+        return <Activity size={14} />;
+      case 'Coffee':
+        return <Coffee size={14} />;
+      case 'Navigation':
+        return <Navigation size={14} />;
+      case 'CloudRain':
+        return <CloudRain size={14} />;
+      case 'AlertTriangle':
+        return <AlertTriangle size={14} />;
+      default:
+        return <Activity size={14} />;
+    }
+  };
 
-  // Preset Prompts for Fan
-  const presetPrompts = [
-    `How do I navigate to ${activeStadium.ticket.seat.split(',')[0]} from entry gate?`,
-    "Where is the nearest food stall with wait times under 5 mins?",
-    "Report a medical hazard: broken glass at South Entrance.",
-    "What stadium rules apply to banners and bags?"
-  ];
+  // Helper to parse message text and apply Emerald and Amber left borders
+  const renderMessageText = (text) => {
+    if (typeof text !== 'string') return text;
+    
+    const lines = text.split('\n');
+    return lines.map((line, idx) => {
+      let style = {};
+      let className = "chat-message-line";
+      
+      if (line.toLowerCase().includes('(emerald)') || line.toLowerCase().includes('verified')) {
+        style = { borderLeft: '3px solid #10b981', paddingLeft: '8px', background: 'rgba(16, 185, 129, 0.04)', margin: '4px 0', borderRadius: '2px' };
+      } else if (line.toLowerCase().includes('(amber)') || line.toLowerCase().includes('speculative')) {
+        style = { borderLeft: '3px solid #f59e0b', paddingLeft: '8px', background: 'rgba(245, 158, 11, 0.04)', margin: '4px 0', borderRadius: '2px' };
+      }
+      
+      // Convert bold markdown **text** to HTML
+      const parts = line.split('**');
+      const renderedLine = parts.map((part, i) => {
+        if (i % 2 === 1) {
+          return <strong key={i}>{part}</strong>;
+        }
+        return part;
+      });
+
+      return (
+        <div key={idx} style={style} className={className}>
+          {renderedLine}
+        </div>
+      );
+    });
+  };
 
   // Volunteer Task Helpers & Sustainability Helpers
   const [volTaskName, setVolTaskName] = useState('');
@@ -1072,40 +1325,114 @@ function App() {
       const lowercaseQuery = query.toLowerCase();
       const lang = translations[chatLanguage] ? chatLanguage : 'en';
 
-      if (lowercaseQuery.includes('section 124') || lowercaseQuery.includes('navigate') || lowercaseQuery.includes('how to get to')) {
-        aiText = translations[lang].route;
-        reasoningText = `Analyzed location context for Gate B and Section 124 route mapping in ${lang.toUpperCase()}.`;
-      } else if (lowercaseQuery.includes('food') || lowercaseQuery.includes('concession') || lowercaseQuery.includes('eat') || lowercaseQuery.includes('drink')) {
-        aiText = translations[lang].food;
-        reasoningText = `Scanned current queue times across nearby active concessions in ${lang.toUpperCase()}.`;
-      } else if (lowercaseQuery.includes('medical') || lowercaseQuery.includes('report') || lowercaseQuery.includes('hazard') || lowercaseQuery.includes('glass') || lowercaseQuery.includes('spill')) {
-        aiText = translations[lang].medical;
-        reasoningText = `Detected hazard keyword. Auto-registered dispatch incident log in ${lang.toUpperCase()}.`;
+      // Check for Operations-focused Actionable Chips queries
+      if (lowercaseQuery.includes('incident report') || lowercaseQuery.includes('spill') || lowercaseQuery.includes('medical')) {
+        aiText = `📝 **Operations Incident Report Draft**
+• **Status**: [VERIFIED] Resolved
+• **Incident ID**: IR-2026-9812
+• **Location**: South Corridor, Concession Stand #3
+• **Description**: Minor water spill reported near walkway.
+• **AI-Verified resolution (Emerald)**: Facilities dispatch logs confirm sanitation crew cleared the spill and adjusted the valve pressure at 19:58. Area is now dry and safe.
+• **Speculative Risk Assessment (Amber)**: Halftime crowd flow modeling predicts a 14% increase in pedestrian density near Stand #3 corridor. Recommend setting up physical guide ropes to manage flow and prevent sudden stops.`;
+        reasoningText = `Drafted operational incident report based on confirmed IoT telemetry and predictive crowd models.`;
+      } else if (lowercaseQuery.includes('optimize security') || lowercaseQuery.includes('security') || lowercaseQuery.includes('personnel') || lowercaseQuery.includes('re-allocation')) {
+        aiText = `⚡ **Security Personnel Optimization Strategy**
+• **Objective**: Prevent bottlenecks during match phase transitions.
+• **AI-Verified Allocation (Emerald)**:
+  - Gate B: 24 active security officers (Status: Optimal, wait time < 2m).
+  - Gate D: 18 active officers (Status: Optimal).
+• **Speculative Action Plan (Amber)**:
+  - Predictive telemetry flags a potential crowd bottleneck at Sector 124 entrance. Demand forecast model shows a 25% surge in arrivals from transit shuttle wave 4 within 6 minutes.
+  - **Recommendation**: Temp-deploy 6 standby security personnel from Gate B to Section 124 entrance to proactively guide the incoming surge.`;
+        reasoningText = `Generated security optimization plan by merging live gate throughput and incoming shuttle bus predictions.`;
+      } else if (lowercaseQuery.includes('voucher') || lowercaseQuery.includes('concession') || lowercaseQuery.includes('food') || lowercaseQuery.includes('drink') || lowercaseQuery.includes('eat')) {
+        aiText = `🍔 **Concession Voucher Deployment Analysis**
+• **Objective**: Redistribute halftime queue loads.
+• **AI-Verified Concessions (Emerald)**:
+  - Concession Stall #1: 15 mins wait (Angus Burger).
+  - Concession Stall #2: 4 mins wait (Bavarian Pretzel).
+• **Speculative Campaign (Amber)**:
+  - Stall #1 queue predicted to reach 22 minutes at peak halftime.
+  - **Proposed Optimization**: Broadcast a **20% discount coupon** for Concession Stall #2 (Pretzels) to spectators in Section 124 to divert demand from Stall #1.`;
+        reasoningText = `Calculated queue mitigation campaigns using live concession wait times and predictive marketing models.`;
+      } else if (lowercaseQuery.includes('shuttle') || lowercaseQuery.includes('transit') || lowercaseQuery.includes('exit') || lowercaseQuery.includes('egress') || lowercaseQuery.includes('bus')) {
+        aiText = `🚌 **Transit & Shuttle Dispatch Optimization**
+• **Objective**: Minimize spectator wait times post-event.
+• **AI-Verified Transit (Emerald)**:
+  - NJ Transit Rail: On schedule, departures every 5 minutes.
+  - Eco Shuttle: Wave 4 active (12 zero-emission buses).
+• **Speculative Projection (Amber)**:
+  - High probability of rideshare surge pricing starting 10 minutes post-match.
+  - **Action**: Alert fans on portal to prioritize Eco Shuttles or NJ Transit to avoid surges and reduce carbon footprints by up to 85%.`;
+        reasoningText = `Optimized egress transit guide using train tables and rideshare demand indicators.`;
+      } else if (lowercaseQuery.includes('volunteer') || lowercaseQuery.includes('voltask') || lowercaseQuery.includes('green')) {
+        aiText = `🌱 **Volunteer and Eco-Task Force Optimization**
+• **Objective**: Improve waste-sorting and green zone engagement.
+• **AI-Verified Status (Emerald)**:
+  - 14 Volunteers actively monitoring North Gate recycling bins.
+  - Zero-plastic concession standards currently at 94% compliance.
+• **Speculative Outlook (Amber)**:
+  - Concession bin overflow predicted in Section 124 corridor by end of third quarter.
+  - **Action**: Proactively dispatch 4 green volunteers with auxiliary bin bags to Section 124.`;
+        reasoningText = `Checked waste telemetry compliance and dispatched volunteers to predicted high-litter zones.`;
+      } else if (lowercaseQuery.includes('wait') || lowercaseQuery.includes('lanes') || lowercaseQuery.includes('congestion') || lowercaseQuery.includes('brief') || lowercaseQuery.includes('scan')) {
+        aiText = `🚥 **Lane Operations & Ticket Congestion Scan**
+• **AI-Verified Telemetry (Emerald)**:
+  - Main ticket lanes average processing speed: 4.2 seconds/fan.
+  - Auxiliary Lane 4 closed (maintenance complete, ready for operation).
+• **Speculative Flow Forecast (Amber)**:
+  - Turnstile queue at Gate A predicted to swell from 3 mins to 14 mins during the match-starting rush.
+  - **Action**: Open Auxiliary Lane 4 immediately to absorb Gate A overflow.`;
+        reasoningText = `Analyzed gate throughput and opened standby lanes for predicted peak flows.`;
+      } else if (lowercaseQuery.includes('vip') || lowercaseQuery.includes('vip arrivals')) {
+        aiText = `⭐ **VIP Escort & VIP Entrance Coordination**
+• **AI-Verified Arrivals (Emerald)**:
+  - 4 diplomatic convoy vehicles safely cleared through Security Gate C.
+  - VIP Suite corridor security lines clear.
+• **Speculative Arrival Timeline (Amber)**:
+  - Guest of Honor delegation arrival time is estimated at 20:12 (±3 minutes) based on downtown traffic sensors.
+  - **Action**: Ready the guest relations escort team at Gate C VIP lounge by 20:05.`;
+        reasoningText = `Estimated VIP arrival window using external traffic flows and local security statuses.`;
+      } else if (lowercaseQuery.includes('rules') || lowercaseQuery.includes('banner') || lowercaseQuery.includes('bag')) {
+        aiText = `🎒 **MetLife Stadium Security Policy Guidelines**
+• **AI-Verified Policy (Emerald)**:
+  - Clear bag policy is in effect (max size: 12" x 6" x 12").
+  - Small clutches under 4.5" x 6.5" are permitted.
+• **Speculative Bottleneck Warning (Amber)**:
+  - Bag inspections at Gate B are running slightly slower due to manual checks of non-compliant bags.
+  - **Action**: Advise incoming fans via app notifications to use the express "No Bag" lanes if possible.`;
+        reasoningText = `Retrieved stadium policies and cross-referenced with live gate wait times.`;
       } else {
-        aiText = translations[lang].default;
-        reasoningText = `Default general stadium operations retrieval mapping in ${lang.toUpperCase()}.`;
+        // Fallback to translations
+        if (lowercaseQuery.includes('section 124') || lowercaseQuery.includes('navigate') || lowercaseQuery.includes('how to get to')) {
+          aiText = translations[lang].route;
+          reasoningText = `Analyzed location context for Gate B and Section 124 route mapping in ${lang.toUpperCase()}.`;
+        } else {
+          aiText = translations[lang].default;
+          reasoningText = `Default general stadium operations retrieval mapping in ${lang.toUpperCase()}.`;
+        }
       }
 
       // Live Gemini call if API Key is inputted
       if (geminiApiKey) {
         try {
-          const promptWithContext = `You are ArenaFlow Assistant, an AI system for MetLife Stadium during the FIFA World Cup 2026.
-          Match context: Argentina vs France, Quarter-Final 1, 19 July 2026.
-          Fan Context: Name: Alex Morgan, Seat: Section 124, Row 12, Seat 4. Allocated Entrance Gate: Gate B.
-          Stadium operations context:
+          const promptWithContext = `You are ArenaFlow AI, an operations assistant system for ${activeStadium.name} during the match ${activeStadium.currentMatch}.
+          
+          Operational context:
           - North Stand: Normal flow (density 32%)
           - South Stand: Heavy congestion (density 89%, long restroom lines)
           - East Stand: Moderate flow (density 68%)
           - West Stand: Normal flow (density 45%)
-          - Concession Stand #8: carbonation leak under repair.
-          - Concessions: Burgers (15 min wait), Pretzels (4 min wait), Soda (2 min wait).
+          
+          Rules for verified vs speculative data formatting:
+          - Format lines containing verified data using "AI-Verified (Emerald)" in the line text.
+          - Format lines containing speculative/predictive data using "Speculative (Amber)" in the line text.
+          - The UI parser will style lines containing "(Emerald)" with green borders and lines containing "(Amber)" with orange borders.
           
           User is asking: "${query}".
           
-          IMPORTANT: The user wants to communicate in the following language: ${chatLanguage} (en=English, es=Spanish, fr=French, pt=Portuguese, ar=Arabic, hi=Hindi).
-          Please formulate your response ENTIRELY in that selected language. Localize all directions, tips, and greetings accordingly.
-          
-          Respond to the user with helpful, precise stadium directions or solutions. Write in rich markdown format with emojis.`;
+          Please formulate your response ENTIRELY in the selected language: ${chatLanguage} (en=English, es=Spanish, fr=French, pt=Portuguese, ar=Arabic, hi=Hindi).
+          Write in a professional, premium tone with emojis.`;
           
           const apiResponse = await callGeminiAPI(promptWithContext);
           if (apiResponse) {
@@ -3581,26 +3908,83 @@ function App() {
           );
         })()}
 
-        {/* Tab 3: AI Assistant */}
+        {/* Tab 3: AI Operations Assistant */}
         {activeTab === 'assistant' && (
-          <div className="glass-card ai-assistant-layout">
+          <div className="ai-assistant-layout">
             
-            {/* Chat Area Column */}
+            {/* Left Pane: Live Intelligence Feed */}
+            <div className="intelligence-feed-container">
+              <div className="feed-header">
+                <div className="feed-title">
+                  <Activity size={18} style={{ color: 'var(--color-primary)' }} />
+                  Live Intelligence Feed
+                </div>
+                <div className="feed-filters">
+                  <button 
+                    className={`feed-filter-btn ${intelFeedFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setIntelFeedFilter('all')}
+                  >
+                    All
+                  </button>
+                  <button 
+                    className={`feed-filter-btn ${intelFeedFilter === 'verified' ? 'active verified' : ''}`}
+                    onClick={() => setIntelFeedFilter('verified')}
+                  >
+                    Verified
+                  </button>
+                  <button 
+                    className={`feed-filter-btn ${intelFeedFilter === 'speculative' ? 'active speculative' : ''}`}
+                    onClick={() => setIntelFeedFilter('speculative')}
+                  >
+                    Speculative
+                  </button>
+                </div>
+              </div>
+
+              <div className="feed-scroll-list">
+                {insights
+                  .filter(ins => intelFeedFilter === 'all' || ins.type === intelFeedFilter)
+                  .map((ins) => (
+                    <div key={ins.id} className={`insight-card ${ins.type}`}>
+                      <div className="insight-meta">
+                        <span className="insight-category">
+                          {ins.category}
+                        </span>
+                        <span className="insight-time">{ins.timestamp}</span>
+                      </div>
+                      <div className="insight-body">
+                        {ins.message}
+                      </div>
+                      <div className="insight-footer">
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                          {renderInsightIcon(ins.icon)}
+                          {ins.source}
+                        </span>
+                        <span className="insight-badge">
+                          {ins.type === 'verified' ? 'VERIFIED' : 'SPECULATIVE'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Right Pane: Sleek Glassmorphism Chat Interface */}
             <div className="chat-room-container">
-              <div className="card-header">
+              <div className="card-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
                 <h2 className="card-title">
-                  <MessageSquare size={20} style={{ color: 'var(--color-primary)' }} />
-                  Interactive GenAI Assistant Engine
+                  <MessageSquare size={18} style={{ color: 'var(--color-primary)' }} />
+                  GenAI Operations Assistant
                 </h2>
                 
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   {/* Language Selector */}
-                  <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <Globe size={14} style={{ color: 'var(--color-accent)' }} />
+                  <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <Globe size={12} style={{ color: 'var(--color-accent)' }} />
                     <select
                       value={chatLanguage}
                       onChange={(e) => setChatLanguage(e.target.value)}
-                      style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       <option value="en" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>EN - English</option>
                       <option value="es" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>ES - Español</option>
@@ -3612,17 +3996,17 @@ function App() {
                   </div>
 
                   {/* Gemini Live API settings */}
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <Key size={14} style={{ color: 'var(--color-primary)' }} />
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.35rem 0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <Key size={12} style={{ color: 'var(--color-primary)' }} />
                     <input
                       type="password"
-                      placeholder="Input Gemini API Key..."
+                      placeholder="API Key..."
                       value={geminiApiKey}
                       onChange={(e) => setGeminiApiKey(e.target.value)}
-                      style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '0.75rem', width: 140 }}
+                      style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '0.72rem', width: 90 }}
                     />
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
-                      {geminiApiKey ? 'Live Mode' : 'Offline'}
+                    <div style={{ fontSize: '0.62rem', color: 'var(--text-secondary)' }}>
+                      {geminiApiKey ? 'Live' : 'Offline'}
                     </div>
                   </div>
                 </div>
@@ -3638,20 +4022,35 @@ function App() {
                         <span>AI reasoning: {msg.reasoning}</span>
                       </div>
                     )}
-                    <div style={{ whiteSpace: 'pre-line' }}>
-                      {msg.text}
+                    <div>
+                      {renderMessageText(msg.text)}
                     </div>
                   </div>
                 ))}
 
                 {isTyping && (
-                  <div className="message-bubble ai" style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', padding: '0.8rem 1.2rem' }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'beacon 1.2s infinite' }}></span>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'beacon 1.2s infinite 0.2s' }}></span>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'beacon 1.2s infinite 0.4s' }}></span>
+                  <div className="message-bubble ai" style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', padding: '0.6rem 1rem' }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'beacon 1.2s infinite' }}></span>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'beacon 1.2s infinite 0.2s' }}></span>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'beacon 1.2s infinite 0.4s' }}></span>
                   </div>
                 )}
                 <div ref={chatEndRef} />
+              </div>
+
+              {/* Actionable Chips */}
+              <div className="action-chips-container">
+                {getContextualChips(simPhase).map((chipText, i) => (
+                  <button 
+                    key={i} 
+                    className="action-chip"
+                    onClick={() => handleSendChat(chipText)}
+                    disabled={isTyping}
+                  >
+                    <Zap size={10} style={{ color: 'var(--color-primary)' }} />
+                    {chipText}
+                  </button>
+                ))}
               </div>
 
               {/* Chat input box */}
@@ -3666,60 +4065,9 @@ function App() {
                   disabled={isTyping}
                 />
                 <button className="btn btn-primary" onClick={() => handleSendChat()} disabled={isTyping}>
-                  <Send size={16} />
+                  <Send size={14} />
                   Send
                 </button>
-              </div>
-            </div>
-
-            {/* AI Settings Column */}
-            <div className="ai-control-panel">
-              {/* Context variables panel */}
-              <div className="glass-card" style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem' }}>
-                <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', fontFamily: 'var(--heading)', color: 'var(--text-primary)' }}>
-                  Model Context Injection
-                </h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.4' }}>
-                  The GenAI prompt automatically inherits active game telemetry to provide contextually-accurate guidelines.
-                </p>
-
-                <ul className="info-bullet-list">
-                  <li><strong>Active User:</strong> Alex Morgan (Sec 124)</li>
-                  <li><strong>Assigned Entrypoint:</strong> East Gate B</li>
-                  <li><strong>Ticket Code:</strong> FIFA-2026-ARGFRA</li>
-                  <li><strong>Active Halftime Congestion:</strong> South Stand</li>
-                  <li><strong>Nearest Restrooms:</strong> Sec 124 (Wait time: 2 mins)</li>
-                </ul>
-              </div>
-
-              {/* Preset prompt helper */}
-              <div className="glass-card" style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem' }}>
-                <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', fontFamily: 'var(--heading)', color: 'var(--text-primary)' }}>
-                  Quick Preset Actions
-                </h3>
-                <div className="preset-prompts-grid">
-                  {presetPrompts.map((promptText, i) => (
-                    <button 
-                      key={i} 
-                      className="preset-prompt-btn"
-                      onClick={() => handleSendChat(promptText)}
-                      disabled={isTyping}
-                    >
-                      {promptText}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Developer Tip */}
-              <div style={{ background: 'var(--color-primary-glow)', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', lineHeight: '1.45' }}>
-                <h4 style={{ fontWeight: 700, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.25rem' }}>
-                  <Zap size={12} />
-                  Developer Insights
-                </h4>
-                <p style={{ color: 'var(--text-secondary)' }}>
-                  This panel demonstrates how few-shot prompt injection aligns natural language queries directly with backend database parameters (e.g. mapping tickets to gate directories).
-                </p>
               </div>
             </div>
 
