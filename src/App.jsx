@@ -1712,7 +1712,7 @@ function App() {
               Fan Portal
             </button>
             <button 
-              className={`nav-tab-btn ${activeTab === 'assistant' ? 'active' : ''}`}
+              className={`nav-tab-btn ${activeTab === 'assistant' ? 'active' : ''} ai-assistant-toggle`}
               onClick={() => setActiveTab('assistant')}
             >
               <MessageSquare size={16} />
@@ -1996,16 +1996,19 @@ function App() {
                 <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minWidth: '450px', padding: '1.25rem 0' }}>
                   
                   {/* Background Track Line */}
-                  <div style={{ 
-                    position: 'absolute', 
-                    left: '40px', 
-                    right: '40px', 
-                    height: '4px', 
-                    background: 'var(--border-color)', 
-                    top: '32px', 
-                    zIndex: 1,
-                    borderRadius: '2px'
-                  }} />
+                  <div 
+                    className="sim-track-bg"
+                    style={{ 
+                      position: 'absolute', 
+                      left: '40px', 
+                      right: '40px', 
+                      height: '4px', 
+                      background: 'var(--border-color)', 
+                      top: '32px', 
+                      zIndex: 1,
+                      borderRadius: '2px'
+                    }} 
+                  />
 
                   {/* Active Progress Line */}
                   {(() => {
@@ -2060,7 +2063,7 @@ function App() {
                             borderRadius: '50%',
                             background: nodeBgColor,
                             border: `2px solid ${nodeBorderColor}`,
-                            color: isActive ? '#ffffff' : isCompleted ? 'var(--color-primary)' : 'var(--text-secondary)',
+                            color: isActive ? (isDarkMode ? '#ffffff' : phase.color) : isCompleted ? 'var(--color-primary)' : 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -2238,40 +2241,38 @@ function App() {
                   {/* Interactive sector tooltip overlay */}
                   {hoveredSector && simulatedSectorData[hoveredSector] && (
                     <div 
+                      className="stadium-tooltip"
                       style={{ 
                         position: 'absolute', 
                         left: `${tooltipPos.x + 15}px`, 
                         top: `${tooltipPos.y + 15}px`, 
                         pointerEvents: 'none',
                         zIndex: 1000,
-                        background: 'rgba(10, 13, 20, 0.95)',
                         border: `1px solid ${simulatedSectorData[hoveredSector].colorClass === 'sector-high' ? 'var(--color-danger)' : simulatedSectorData[hoveredSector].colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)'}`,
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.05)',
                         borderRadius: '6px',
                         padding: '0.6rem 0.8rem',
                         fontSize: '0.72rem',
                         minWidth: '160px',
-                        backdropFilter: 'blur(8px)',
                         transition: 'left 0.1s ease-out, top 0.1s ease-out',
                         fontFamily: 'var(--sans)'
                       }}
                     >
-                      <div style={{ fontWeight: '800', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '0.25rem', marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="tooltip-title" style={{ fontWeight: '800', paddingBottom: '0.25rem', marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>{hoveredSector}</span>
                         <span style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(224, 159, 62, 0.12)', padding: '0.05rem 0.25rem', borderRadius: '3px', fontFamily: 'var(--mono)', letterSpacing: '0.5px' }}>TELEMETRY</span>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 0.5rem', color: '#94a3b8' }}>
-                        <span style={{ color: '#94a3b8' }}>Density:</span>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 0.5rem' }}>
+                        <span className="tooltip-label">Density:</span>
                         <span style={{ fontWeight: '800', color: simulatedSectorData[hoveredSector].colorClass === 'sector-high' ? 'var(--color-danger)' : simulatedSectorData[hoveredSector].colorClass === 'sector-medium' ? 'var(--color-warning)' : 'var(--color-success)' }}>{simulatedSectorData[hoveredSector].density}</span>
                         
-                        <span style={{ color: '#94a3b8' }}>Status:</span>
-                        <span style={{ fontWeight: '600', color: '#f8fafc' }}>{simulatedSectorData[hoveredSector].status}</span>
+                        <span className="tooltip-label">Status:</span>
+                        <span className="tooltip-value" style={{ fontWeight: '600' }}>{simulatedSectorData[hoveredSector].status}</span>
                         
-                        <span style={{ color: '#94a3b8' }}>Security:</span>
-                        <span style={{ fontWeight: '600', color: '#f8fafc' }}>{simulatedSectorData[hoveredSector].security}</span>
+                        <span className="tooltip-label">Security:</span>
+                        <span className="tooltip-value" style={{ fontWeight: '600' }}>{simulatedSectorData[hoveredSector].security}</span>
 
-                        <span style={{ color: '#94a3b8' }}>Climate:</span>
-                        <span style={{ fontWeight: '600', color: '#f8fafc' }}>{simulatedSectorData[hoveredSector].temp}</span>
+                        <span className="tooltip-label">Climate:</span>
+                        <span className="tooltip-value" style={{ fontWeight: '600' }}>{simulatedSectorData[hoveredSector].temp}</span>
                       </div>
                     </div>
                   )}
