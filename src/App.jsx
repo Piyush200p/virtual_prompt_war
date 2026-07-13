@@ -35,6 +35,143 @@ import {
 } from 'lucide-react';
 import { STADIUM_CONFIGS } from './data/stadiums';
 
+// FIFA World Cup 2026 Brand Collaborations & Corporate Sponsors Dataset
+const SPONSORS = [
+  {
+    name: "Adidas",
+    tier: "partner",
+    tierLabel: "FIFA Partner",
+    desc: "Official sportswear and match ball partner. Visit the Megastore at North Plaza for official gear.",
+    benefit: "Match Balls & Apparel"
+  },
+  {
+    name: "Lenovo",
+    tier: "partner",
+    tierLabel: "FIFA Partner",
+    desc: "Official Technology Partner. Lenovo integrates AI models and edge computing into the wayfinding and crowd telemetry operations.",
+    benefit: "AI Ops & Computing"
+  },
+  {
+    name: "Coca-Cola",
+    tier: "partner",
+    tierLabel: "FIFA Partner",
+    desc: "Official Beverage Partner. Coke refresh stations are located at all concession exits. Grab a cold Coke today.",
+    benefit: "Official Beverage"
+  },
+  {
+    name: "Hyundai-Kia",
+    tier: "partner",
+    tierLabel: "FIFA Partner",
+    desc: "Official Mobility and Automotive Partner. Access dedicated EV shuttles at Gate 4B for easy transport.",
+    benefit: "EV Shuttles & Transit"
+  },
+  {
+    name: "Visa",
+    tier: "partner",
+    tierLabel: "FIFA Partner",
+    desc: "Official Payment Technology Partner. Tap to pay at any concession stand. 10% off when paying with Visa.",
+    benefit: "10% Concessions Off"
+  },
+  {
+    name: "Qatar Airways",
+    tier: "partner",
+    tierLabel: "FIFA Partner",
+    desc: "Official Global Airline. Travel globally with premium flight services for visiting fan groups.",
+    benefit: "Global Travel Partner"
+  },
+  {
+    name: "Aramco",
+    tier: "partner",
+    tierLabel: "FIFA Partner",
+    desc: "Official Energy Partner. Powering the sustainable smart-grid charging pods across the venue.",
+    benefit: "Renewable Power Pods"
+  },
+  {
+    name: "AB InBev",
+    tier: "sponsor",
+    tierLabel: "World Cup Sponsor",
+    desc: "Official Beverage Sponsor. Budweiser and Michelob Ultra zero-alcohol lounges located at the East Stand.",
+    benefit: "Michelob Fan Lounges"
+  },
+  {
+    name: "Unilever",
+    tier: "sponsor",
+    tierLabel: "World Cup Sponsor",
+    desc: "Official Personal Care Partner. Axe and Dove Men+Care styling stations set up in rest areas.",
+    benefit: "Personal Care Zones"
+  },
+  {
+    name: "Bank of America",
+    tier: "sponsor",
+    tierLabel: "World Cup Sponsor",
+    desc: "Official Banking Sponsor. Linked directly to your Digital ID Pass for simple, secure deposits.",
+    benefit: "In-App Secure Wallet"
+  },
+  {
+    name: "Lay's",
+    tier: "sponsor",
+    tierLabel: "World Cup Sponsor",
+    desc: "Official snack food partner. Grab a packet of Lay's at Concessions Stall #3.",
+    benefit: "Official Snacking"
+  },
+  {
+    name: "McDonald's",
+    tier: "sponsor",
+    tierLabel: "World Cup Sponsor",
+    desc: "Official Quick-Service Restaurant. Place a pre-order now for instant pickup at Concession Stall #1.",
+    benefit: "Pre-order Quick Bites"
+  },
+  {
+    name: "Hisense",
+    tier: "sponsor",
+    tierLabel: "World Cup Sponsor",
+    desc: "Official Consumer Electronics Sponsor. Advanced display technologies power the stadium big screens.",
+    benefit: "HD Broadcast Displays"
+  },
+  {
+    name: "Verizon",
+    tier: "sponsor",
+    tierLabel: "World Cup Sponsor",
+    desc: "Official Telecommunications Partner. Ultra Wideband 5G powers the Live AR Player Tracking overlays.",
+    benefit: "5G AR Stats Overlay"
+  },
+  {
+    name: "Airbnb",
+    tier: "supporter",
+    tierLabel: "Local Supporter",
+    desc: "Alternative accommodation platform. Book local homes close to the stadium for a local experience.",
+    benefit: "Alternative Lodging"
+  },
+  {
+    name: "American Airlines",
+    tier: "supporter",
+    tierLabel: "Local Supporter",
+    desc: "North American Airline Supporter. Handling local domestic transfers and logistics for match-day arrivals.",
+    benefit: "Domestic Airline"
+  },
+  {
+    name: "DoorDash",
+    tier: "supporter",
+    tierLabel: "Local Supporter",
+    desc: "On-demand delivery sponsor. Look out for the DoorDash drop-zones for VIP seat-side food dropoffs.",
+    benefit: "In-Seat Food Delivery"
+  },
+  {
+    name: "Globant",
+    tier: "supporter",
+    tierLabel: "Local Supporter",
+    desc: "IT and digital services supporter. Globant manages the mobile application systems and stadium interfaces.",
+    benefit: "Mobile Apps Developer"
+  },
+  {
+    name: "Diageo",
+    tier: "supporter",
+    tierLabel: "Local Supporter",
+    desc: "Official spirits supporter across the Americas. Visit the hospitality suite for curated mixology.",
+    benefit: "Hospitality Lounges"
+  }
+];
+
 // Format Match Teams to Initials with hover full-names
 const formatMatchInitials = (matchStr) => {
   if (!matchStr) return "";
@@ -368,6 +505,8 @@ function App() {
   
   // New State variables for FIFA 2026 Enhancements
   const [accessibilityMode, setAccessibilityMode] = useState(false);
+  const [selectedSponsor, setSelectedSponsor] = useState(null);
+  const [sponsorTierFilter, setSponsorTierFilter] = useState('all');
   const [selectedConcessionCategory, setSelectedConcessionCategory] = useState('All');
   const [chatLanguage, setChatLanguage] = useState('en');
   const [volunteerTasks, setVolunteerTasks] = useState([]);
@@ -3271,6 +3410,96 @@ function App() {
                           <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>France</span>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Brand Collaborations & Sponsors Section */}
+                    <div style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.85rem',
+                      position: 'relative',
+                      zIndex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.4rem' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontFamily: 'var(--mono)', fontWeight: 600 }}>🤝 World Cup Sponsors</span>
+                        <span style={{ fontSize: '0.55rem', color: 'var(--color-primary)', fontWeight: 700, fontFamily: 'var(--mono)' }}>OFFICIAL PARTNERS</span>
+                      </div>
+                      
+                      {/* Tier Filters */}
+                      <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto', paddingBottom: '0.2rem' }}>
+                        {['all', 'partner', 'sponsor', 'supporter'].map(tier => (
+                          <button
+                            key={tier}
+                            onClick={() => setSponsorTierFilter(tier)}
+                            style={{
+                              background: sponsorTierFilter === tier ? 'var(--color-primary)' : 'rgba(255,255,255,0.04)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: '4px',
+                              padding: '0.15rem 0.4rem',
+                              fontSize: '0.55rem',
+                              fontWeight: 600,
+                              color: sponsorTierFilter === tier ? '#fff' : 'var(--text-secondary)',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              textTransform: 'uppercase',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            {tier}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Sponsors Grid / Horizontal Scroll */}
+                      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', padding: '0.1rem 0' }}>
+                        {SPONSORS.filter(s => sponsorTierFilter === 'all' || s.tier === sponsorTierFilter).map(sponsor => (
+                          <div
+                            key={sponsor.name}
+                            onClick={() => setSelectedSponsor(selectedSponsor?.name === sponsor.name ? null : sponsor)}
+                            style={{
+                              background: selectedSponsor?.name === sponsor.name ? 'rgba(224, 159, 62, 0.15)' : 'rgba(255,255,255,0.03)',
+                              border: `1px solid ${selectedSponsor?.name === sponsor.name ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                              borderRadius: '6px',
+                              padding: '0.4rem 0.6rem',
+                              cursor: 'pointer',
+                              minWidth: '85px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.1rem',
+                              textAlign: 'center',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>{sponsor.name}</span>
+                            <span style={{ fontSize: '0.48rem', color: 'var(--color-primary)', fontWeight: 700, whiteSpace: 'nowrap' }}>{sponsor.benefit}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Detailed info card */}
+                      {selectedSponsor && (
+                        <div style={{
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          border: '1px solid rgba(224, 159, 62, 0.3)',
+                          borderRadius: '6px',
+                          padding: '0.5rem 0.6rem',
+                          animation: 'fade-in-up 0.3s ease-out'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary)' }}>{selectedSponsor.name}</span>
+                            <span style={{ fontSize: '0.5rem', background: 'rgba(224, 159, 62, 0.12)', color: 'var(--color-primary)', padding: '0.05rem 0.25rem', borderRadius: '3px', fontWeight: 700, fontFamily: 'var(--mono)' }}>{selectedSponsor.tierLabel}</span>
+                          </div>
+                          <p style={{ fontSize: '0.62rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.3' }}>
+                            {selectedSponsor.desc}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
