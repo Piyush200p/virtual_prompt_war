@@ -37,3 +37,16 @@ Orchestrate the code integration, handle multilingual support in the GenAI Chatb
 - Functional multilingual capabilities in both online (Gemini) and offline modes.
 - Updated Dev Mode dashboards.
 - A lint-free, zero-error production build.
+
+---
+
+## 🚀 Deployment & Troubleshooting Guidelines
+If GitHub Pages fails to update or the automatic workflow run encounters a transient failure:
+1. **Trigger Manual Rebuild**: Use the manual trigger (`workflow_dispatch`) from the Actions tab or trigger it via curl:
+   ```bash
+   curl -X POST -H "Accept: application/vnd.github+json" -H "Authorization: token <PAT>" https://api.github.com/repos/Piyush200p/virtual_prompt_war/actions/workflows/deploy.yml/dispatches -d '{"ref":"main"}'
+   ```
+2. **Execute Local Fallback Deploy**: Run the automation script to build and push directly to `gh-pages` bypassing the Actions runner queue:
+   ```bash
+   python execution/deploy_pages.py
+   ```
