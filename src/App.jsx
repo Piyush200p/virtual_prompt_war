@@ -391,6 +391,11 @@ function App() {
     }
   }, [currentStadiumId, stadiumsRegistry]);
 
+  // Sync theme attribute with state
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
   const handleLoadSampleJSON = () => {
     setInjectedJson(sampleStadiumJSON);
   };
@@ -1727,10 +1732,7 @@ function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {/* Light/Dark Mode Toggle */}
             <button
-              onClick={() => {
-                setIsDarkMode(!isDarkMode);
-                document.documentElement.setAttribute('data-theme', isDarkMode ? 'light' : 'dark');
-              }}
+              onClick={() => setIsDarkMode(!isDarkMode)}
               title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               style={{
                 background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)',
