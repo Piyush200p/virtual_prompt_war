@@ -30,7 +30,8 @@ import {
   Accessibility,
   Globe,
   Leaf,
-  ClipboardList
+  ClipboardList,
+  Home
 } from 'lucide-react';
 import { STADIUM_CONFIGS } from './data/stadiums';
 
@@ -374,6 +375,12 @@ function App() {
   // Stadium Selection State
   const [currentStadiumId, setCurrentStadiumId] = useState('metlife');
   const activeStadium = stadiumsRegistry[currentStadiumId];
+
+  // High-fidelity Fan Portal Subviews & AR Settings
+  const [phoneSubView, setPhoneSubView] = useState('home');
+  const [arSpeedTracker, setArSpeedTracker] = useState(true);
+  const [arPassMap, setArPassMap] = useState(false);
+  const [arTacticalGrid, setArTacticalGrid] = useState(false);
 
   // Sync volunteer tasks when active stadium updates
   useEffect(() => {
@@ -2705,239 +2712,687 @@ function App() {
                 </div>
 
                 {/* Profile Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-                  <div>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Welcome back</span>
-                    <h3 style={{ fontFamily: 'var(--heading)', fontSize: '1rem', fontWeight: 700 }}>{ticketInfo.holder}</h3>
-                  </div>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center' }}>
-                    <User size={16} />
-                  </div>
-                </div>
-
-                {/* Digital Ticket */}
-                <div className="fan-ticket-card">
-                  <div className="ticket-header">
-                    <span className="ticket-title">{activeStadium.name}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 700 }}>ACTIVE</span>
-                  </div>
-                  <div className="ticket-matchup">
-                    <span className="team-abbr">
-                      {(() => {
-                        const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
-                        const team1 = parts[0] || 'HOME';
-                        if (team1.toLowerCase().includes('argentina')) return 'ARG';
-                        if (team1.toLowerCase().includes('india')) return 'IND';
-                        if (team1.toLowerCase().includes('chelsea')) return 'CHE';
-                        return team1.substring(0, 3).toUpperCase();
-                      })()}
-                    </span>
-                    <span className="match-vs">VS</span>
-                    <span className="team-abbr">
-                      {(() => {
-                        const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
-                        const team2 = parts[1] || 'AWAY';
-                        if (team2.toLowerCase().includes('france')) return 'FRA';
-                        if (team2.toLowerCase().includes('australia')) return 'AUS';
-                        if (team2.toLowerCase().includes('arsenal')) return 'ARS';
-                        return team2.substring(0, 3).toUpperCase();
-                      })()}
-                    </span>
-                  </div>
-                  <div className="ticket-meta-grid">
-                    {(() => {
-                      const seatParts = ticketInfo.seat.split(', ');
-                      const seatSec = seatParts[0] || '';
-                      const seatRow = seatParts[1] || '';
-                      const seatNo = seatParts[2] || '';
-                      return (
-                        <>
-                          <div>
-                            <div className="ticket-meta-label">SECTOR / BLOCK</div>
-                            <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{seatSec.replace('Sec ', '').replace('Block ', '')}</div>
-                          </div>
-                          <div>
-                            <div className="ticket-meta-label">ROW</div>
-                            <div className="ticket-meta-val">{seatRow ? seatRow.replace('Row ', '') : 'A'}</div>
-                          </div>
-                          <div>
-                            <div className="ticket-meta-label">SEAT</div>
-                            <div className="ticket-meta-val">{seatNo ? seatNo.replace('Seat ', '') : '1'}</div>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                  <div className="ticket-meta-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                {phoneSubView !== 'ar' && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: '0.25rem' }}>
                     <div>
-                      <div className="ticket-meta-label">ENTRANCE</div>
-                      <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{ticketInfo.gate.split(' (')[0]}</div>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Welcome back</span>
+                      <h3 style={{ fontFamily: 'var(--heading)', fontSize: '0.95rem', fontWeight: 700 }}>{ticketInfo.holder}</h3>
                     </div>
-                    <div>
-                      <div className="ticket-meta-label">START TIME</div>
-                      <div className="ticket-meta-val">19:00 PM</div>
+                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center' }}>
+                      <User size={14} style={{ color: 'var(--color-primary)' }} />
                     </div>
-                  </div>
-                  <div className="ticket-barcode-box">
-                    <div className="barcode-sim"></div>
-                    <span className="barcode-text">{ticketInfo.barcode}</span>
-                  </div>
-                </div>
-
-                {/* Dynamic Smart Navigation Guide */}
-                <div className="navigation-guide-card">
-                  <h4 style={{ fontSize: '0.85rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <Navigation size={14} style={{ color: 'var(--color-primary)' }} />
-                    Live Wayfinding ({accessibilityMode ? 'ADA Step-Free' : activeStadium.ticket.gate.split(' ')[0]} Route)
-                  </h4>
-                  
-                  {(() => {
-                    const currentWayfinding = (accessibilityMode && activeStadium.accessibilityWayfinding) ? activeStadium.accessibilityWayfinding : activeStadium.wayfinding;
-                    return currentWayfinding.map((stepItem, idx) => {
-                      const isDone = currentRouteStep > idx;
-                      const isActive = currentRouteStep === idx;
-                      return (
-                        <div key={idx} className={`nav-route-step ${isDone ? 'done' : isActive ? 'active' : ''}`}>
-                          <div className="nav-step-icon">
-                            {isDone ? <Check size={10} /> : isActive ? <Flame size={10} /> : idx + 1}
-                          </div>
-                          <div className="nav-step-text">
-                            <div className="nav-step-title">{stepItem.title}</div>
-                            <div className="nav-step-desc">{stepItem.desc}</div>
-                          </div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-
-                {/* Concession Stand Menu */}
-                <div className="food-preorder-section">
-                  <h4 style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <Utensils size={14} style={{ color: 'var(--color-warning)' }} />
-                    Pre-Order Concessions (Stall #3)
-                  </h4>
-                  
-                  {/* Category Pills */}
-                  <div style={{ display: 'flex', gap: '0.3rem', margin: '0.45rem 0 0.6rem 0', flexWrap: 'wrap' }}>
-                    {['All', 'Plant-Based', 'Zero-Waste'].map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => setSelectedConcessionCategory(cat)}
-                        style={{
-                          padding: '0.15rem 0.45rem',
-                          fontSize: '0.62rem',
-                          background: selectedConcessionCategory === cat ? 'var(--color-primary)' : 'rgba(255,255,255,0.04)',
-                          border: `1px solid ${selectedConcessionCategory === cat ? 'var(--color-primary)' : 'var(--border-color)'}`,
-                          color: selectedConcessionCategory === cat ? '#fff' : 'var(--text-primary)',
-                          borderRadius: '12px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        {cat === 'Plant-Based' ? '🌱 Plant-Based' : cat === 'Zero-Waste' ? '♻️ Eco-Friendly' : '🍔 All'}
-                      </button>
-                    ))}
-                  </div>
-
-                  {activeOrderMsg && (
-                    <div style={{ background: 'var(--color-success-glow)', border: '1px solid var(--color-success)', color: 'var(--color-success)', fontSize: '0.75rem', padding: '0.4rem', borderRadius: 4, textAlign: 'center', marginBottom: '0.5rem' }}>
-                      {activeOrderMsg}
-                    </div>
-                  )}
-
-                  {concessionsList.length > 0 ? concessionsList.map((item) => (
-                    <div key={item.id} className="food-item-row">
-                      <div className="food-info" style={{ flex: 1 }}>
-                        <span className="food-name">{item.name}</span>
-                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <span className="food-price">{item.price}</span>
-                          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{item.calories}</span>
-                        </div>
-                        {/* Sustainability Badges */}
-                        <div style={{ display: 'flex', gap: '0.2rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
-                          {item.sustainability && item.sustainability.map((badge, idx) => (
-                            <span key={idx} style={{
-                              fontSize: '0.55rem',
-                              background: badge.toLowerCase().includes('plant') ? 'rgba(16,185,129,0.12)' : 'rgba(59,130,246,0.12)',
-                              color: badge.toLowerCase().includes('plant') ? '#34d399' : '#60a5fa',
-                              border: `1px solid ${badge.toLowerCase().includes('plant') ? 'rgba(16,185,129,0.2)' : 'rgba(59,130,246,0.2)'}`,
-                              padding: '0.02rem 0.2rem',
-                              borderRadius: '3px',
-                              fontWeight: 600
-                            }}>
-                              {badge}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', justifyContent: 'center' }}>
-                        <span className="food-queue-time">
-                          <Clock size={10} />
-                          {item.wait} wait
-                        </span>
-                        <button 
-                          className="btn" 
-                          onClick={() => handleOrderFood(item.name, item.price)}
-                          style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--color-primary)', borderRadius: '4px', color: '#fff' }}
-                        >
-                          Order
-                        </button>
-                      </div>
-                    </div>
-                  )) : (
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem 0' }}>
-                      No menu items match the selected eco-filter.
-                    </div>
-                  )}
-                </div>
-
-                {/* Fan Active Orders Feed */}
-                {orders.length > 0 && (
-                  <div style={{ background: 'rgba(0,0,0,0.15)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <h5 style={{ fontSize: '0.8rem', marginBottom: '0.4rem' }}>Your active pickup vouchers</h5>
-                    {orders.map((ord) => (
-                      <div key={ord.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '0.25rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div>
-                          <span style={{ fontWeight: 600 }}>{ord.name}</span>
-                          <span style={{ color: 'var(--text-secondary)', marginLeft: '0.4rem' }}>({ord.time})</span>
-                        </div>
-                        <span style={{ color: 'var(--color-warning)', fontWeight: 600 }}>{ord.status}</span>
-                      </div>
-                    ))}
                   </div>
                 )}
 
-                {/* 🚆 Eco-Transit Tracker */}
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', marginTop: '0.5rem' }}>
-                  <h4 style={{ fontSize: '0.8rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#60a5fa' }}>
-                    <Globe size={12} style={{ color: 'var(--color-accent)' }} />
-                    Eco-Transit Guide
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    {activeStadium.transportation ? activeStadium.transportation.map((trans, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', padding: '0.15rem 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                        <div>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{trans.type}</span>
-                          <span style={{ color: 'var(--text-secondary)', marginLeft: '0.3rem' }}>({trans.wait})</span>
+                {/* SUBVIEW: HOME SCREEN */}
+                {phoneSubView === 'home' && (
+                  <>
+                    {/* Dynamic Context Header */}
+                    {(() => {
+                      let headerTitle = "Pre-Match: Gate is Open";
+                      let headerDesc = `Use Gate ${ticketInfo.gate.split(' ')[0]}. Proceed to security check.`;
+                      let glowClass = "glow-amber";
+                      let IconComponent = Compass;
+
+                      if (simPhase === 'gates_open' || !simPhase) {
+                        headerTitle = `Pre-Match: Gate ${ticketInfo.gate.split(' ')[0]}`;
+                        headerDesc = `Your gate is open. Seat ${ticketInfo.seat.split(',')[0]} is a 4 min walk. Tap to route.`;
+                        glowClass = "glow-amber";
+                        IconComponent = Compass;
+                      } else if (simPhase === 'match_starting') {
+                        headerTitle = "Warmups: Teams on Pitch";
+                        headerDesc = "Starting lineups active. Find your seat now. Tap for step-free routes.";
+                        glowClass = "glow-orange";
+                        IconComponent = Flame;
+                      } else if (simPhase === 'match_live') {
+                        headerTitle = "Live: Tap for AR Stats";
+                        headerDesc = "Real-time player tracking & speeds active. Tap to open AR scanner.";
+                        glowClass = "glow-cyan";
+                        IconComponent = Eye;
+                      } else if (simPhase === 'half_time') {
+                        headerTitle = "Halftime: Pre-Order Food";
+                        headerDesc = "Avoid peak concession lines. Pre-order eco-friendly foods. Tap to Order.";
+                        glowClass = "glow-purple";
+                        IconComponent = Utensils;
+                      } else if (simPhase === 'crowd_exiting') {
+                        headerTitle = "Post-Match: Exit & Transit";
+                        headerDesc = "Zero-carbon shuttle departs Gate C. Tap to check public transit ID.";
+                        glowClass = "glow-green";
+                        IconComponent = Globe;
+                      }
+
+                      return (
+                        <div 
+                          className={`context-header-card ${glowClass}`}
+                          onClick={() => {
+                            if (simPhase === 'match_live') {
+                              setPhoneSubView('ar');
+                            } else if (simPhase === 'half_time') {
+                              setPhoneSubView('pickup');
+                            } else if (simPhase === 'crowd_exiting') {
+                              setPhoneSubView('ticket');
+                            } else {
+                              setPhoneSubView('navigation');
+                            }
+                          }}
+                          style={{ position: 'relative', zIndex: 1 }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{
+                              padding: '0.4rem',
+                              borderRadius: '6px',
+                              background: 'rgba(255,255,255,0.04)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <IconComponent size={16} style={{ color: glowClass === 'glow-amber' ? 'var(--color-primary)' : glowClass === 'glow-orange' ? 'var(--color-warning)' : glowClass === 'glow-cyan' ? 'var(--color-accent)' : glowClass === 'glow-purple' ? 'var(--color-purple)' : 'var(--color-success)' }} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{headerTitle}</div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.1rem', lineHeight: '1.25' }}>{headerDesc}</div>
+                            </div>
+                          </div>
                         </div>
+                      );
+                    })()}
+
+                    {/* Active Notifications Banner */}
+                    {activeOrderMsg && (
+                      <div style={{ 
+                        background: 'rgba(46,194,126,0.15)', 
+                        border: '1px solid var(--color-success)', 
+                        color: '#fff', 
+                        fontSize: '0.7rem', 
+                        padding: '0.5rem 0.75rem', 
+                        borderRadius: 'var(--radius-sm)', 
+                        textAlign: 'left',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                        animation: 'slide-in 0.3s ease-out',
+                        position: 'relative',
+                        zIndex: 1
+                      }}>
+                        <span style={{ fontSize: '0.8rem' }}>🔔</span>
+                        <div style={{ flex: 1, lineHeight: 1.2 }}>{activeOrderMsg}</div>
+                      </div>
+                    )}
+
+                    {/* Glanceable 2x2 Action Grid */}
+                    <div className="action-grid" style={{ position: 'relative', zIndex: 1 }}>
+                      {/* Tile 1: Express Pickup */}
+                      <div className="action-tile tile-orange" onClick={() => setPhoneSubView('pickup')}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <div className="action-tile-icon-wrap">
+                            <Utensils size={16} />
+                          </div>
+                          <span style={{
+                            fontSize: '0.55rem', background: 'rgba(255, 123, 71, 0.15)',
+                            color: 'var(--color-warning)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                          }}>PRE-ORDER</span>
+                        </div>
+                        <div style={{ marginTop: '0.35rem' }}>
+                          <div className="action-tile-title">Express Pickup</div>
+                          <div className="action-tile-subtitle">Pre-order concessions</div>
+                        </div>
+                        <div className="action-tile-telemetry">
+                          ⏱️ Stall #3: 3m wait
+                        </div>
+                      </div>
+
+                      {/* Tile 2: Smart Navigation */}
+                      <div className="action-tile tile-blue" onClick={() => setPhoneSubView('navigation')}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <div className="action-tile-icon-wrap">
+                            <Navigation size={16} />
+                          </div>
+                          <span style={{
+                            fontSize: '0.55rem', background: 'rgba(91, 155, 213, 0.15)',
+                            color: 'var(--color-accent)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                          }}>ROUTE</span>
+                        </div>
+                        <div style={{ marginTop: '0.35rem' }}>
+                          <div className="action-tile-title">Seat & Restroom</div>
+                          <div className="action-tile-subtitle">Heat-mapped routes</div>
+                        </div>
+                        <div className="action-tile-telemetry">
+                          📍 {ticketInfo.seat.split(',')[0]} ({accessibilityMode ? 'ADA' : 'Std'})
+                        </div>
+                      </div>
+
+                      {/* Tile 3: Live AR Overlays */}
+                      <div className="action-tile tile-purple" onClick={() => setPhoneSubView('ar')}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <div className="action-tile-icon-wrap">
+                            <Eye size={16} />
+                          </div>
+                          <span style={{
+                            fontSize: '0.55rem', background: 'rgba(157, 140, 214, 0.15)',
+                            color: 'var(--color-purple)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                          }}>CAMERA</span>
+                        </div>
+                        <div style={{ marginTop: '0.35rem' }}>
+                          <div className="action-tile-title">Live AR Overlay</div>
+                          <div className="action-tile-subtitle">Real-time stats scan</div>
+                        </div>
+                        <div className="action-tile-telemetry">
+                          👁️ {simPhase === 'match_live' ? 'Tracking Active' : 'Warmups Staged'}
+                        </div>
+                      </div>
+
+                      {/* Tile 4: Digital ID */}
+                      <div className="action-tile tile-green" onClick={() => setPhoneSubView('ticket')}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <div className="action-tile-icon-wrap">
+                            <Ticket size={16} />
+                          </div>
+                          <span style={{
+                            fontSize: '0.55rem', background: 'rgba(46, 194, 126, 0.15)',
+                            color: 'var(--color-success)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                          }}>PASS</span>
+                        </div>
+                        <div style={{ marginTop: '0.35rem' }}>
+                          <div className="action-tile-title">Digital ID Wallet</div>
+                          <div className="action-tile-subtitle">Entry & transit pass</div>
+                        </div>
+                        <div className="action-tile-telemetry">
+                          🎫 Gate {ticketInfo.gate.split(' ')[0]} Entry
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Match Overview / Live Telemetry Widget */}
+                    <div style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.85rem',
+                      position: 'relative',
+                      zIndex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.4rem' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontFamily: 'var(--mono)', fontWeight: 600 }}>Live Match Score</span>
                         <span style={{
-                          fontSize: '0.62rem',
-                          background: trans.eco.includes('🌱') ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
-                          color: trans.eco.includes('🌱') ? '#34d399' : '#f87171',
-                          border: `1px solid ${trans.eco.includes('🌱') ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
-                          padding: '0.02rem 0.2rem',
-                          borderRadius: '3px',
-                          fontWeight: 600
-                        }}>
-                          {trans.eco}
+                          fontSize: '0.6rem', background: 'rgba(229, 83, 75, 0.15)',
+                          color: 'var(--color-danger)', border: '1px solid rgba(229, 83, 75, 0.25)',
+                          borderRadius: '4px', padding: '0.05rem 0.3rem', fontWeight: 700
+                        }}>● {simPhase === 'match_live' ? 'LIVE' : simPhase === 'half_time' ? 'HALFTIME' : simPhase === 'crowd_exiting' ? 'FT' : 'PRE-MATCH'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '0.2rem 0' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
+                          <span style={{ fontSize: '1rem', fontWeight: 800 }}>ARG</span>
+                          <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>Argentina</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <span style={{ fontSize: '1.4rem', fontWeight: 900, fontFamily: 'var(--mono)', letterSpacing: '2px' }}>
+                            {simPhase === 'match_live' ? '2 - 1' : simPhase === 'half_time' ? '1 - 1' : simPhase === 'crowd_exiting' ? '3 - 2' : '0 - 0'}
+                          </span>
+                          <span style={{ fontSize: '0.58rem', color: 'var(--color-primary)', fontWeight: 600, fontFamily: 'var(--mono)' }}>
+                            {simPhase === 'match_live' ? "78'" : simPhase === 'half_time' ? 'HT' : simPhase === 'crowd_exiting' ? 'FT' : '19:00 kickoff'}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
+                          <span style={{ fontSize: '1rem', fontWeight: 800 }}>FRA</span>
+                          <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>France</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* SUBVIEW: DIGITAL ID */}
+                {phoneSubView === 'ticket' && (
+                  <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '0.85rem', animation: 'fade-in-up 0.4s ease-out' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Ticket size={14} /> Spectator Digital ID
+                      </span>
+                      <button onClick={() => setPhoneSubView('home')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 600 }}>Back</button>
+                    </div>
+
+                    <div className="fan-ticket-card" style={{ margin: 0 }}>
+                      <div className="ticket-header">
+                        <span className="ticket-title">{activeStadium.name}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--color-success)', fontWeight: 700 }}>ACTIVE</span>
+                      </div>
+                      <div className="ticket-matchup">
+                        <span className="team-abbr">
+                          {(() => {
+                            const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
+                            const team1 = parts[0] || 'HOME';
+                            if (team1.toLowerCase().includes('argentina')) return 'ARG';
+                            if (team1.toLowerCase().includes('india')) return 'IND';
+                            if (team1.toLowerCase().includes('chelsea')) return 'CHE';
+                            return team1.substring(0, 3).toUpperCase();
+                          })()}
+                        </span>
+                        <span className="match-vs">VS</span>
+                        <span className="team-abbr">
+                          {(() => {
+                            const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
+                            const team2 = parts[1] || 'AWAY';
+                            if (team2.toLowerCase().includes('france')) return 'FRA';
+                            if (team2.toLowerCase().includes('australia')) return 'AUS';
+                            if (team2.toLowerCase().includes('arsenal')) return 'ARS';
+                            return team2.substring(0, 3).toUpperCase();
+                          })()}
                         </span>
                       </div>
-                    )) : (
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>Transit registry loading...</div>
-                    )}
+                      <div className="ticket-meta-grid">
+                        {(() => {
+                          const seatParts = ticketInfo.seat.split(', ');
+                          const seatSec = seatParts[0] || '';
+                          const seatRow = seatParts[1] || '';
+                          const seatNo = seatParts[2] || '';
+                          return (
+                            <>
+                              <div>
+                                <div className="ticket-meta-label">SECTOR / BLOCK</div>
+                                <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{seatSec.replace('Sec ', '').replace('Block ', '')}</div>
+                              </div>
+                              <div>
+                                <div className="ticket-meta-label">ROW</div>
+                                <div className="ticket-meta-val">{seatRow ? seatRow.replace('Row ', '') : 'A'}</div>
+                              </div>
+                              <div>
+                                <div className="ticket-meta-label">SEAT</div>
+                                <div className="ticket-meta-val">{seatNo ? seatNo.replace('Seat ', '') : '1'}</div>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                      <div className="ticket-meta-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                        <div>
+                          <div className="ticket-meta-label">ENTRANCE</div>
+                          <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{ticketInfo.gate.split(' (')[0]}</div>
+                        </div>
+                        <div>
+                          <div className="ticket-meta-label">START TIME</div>
+                          <div className="ticket-meta-val">19:00 PM</div>
+                        </div>
+                      </div>
+                      <div className="ticket-barcode-box">
+                        <div className="barcode-sim"></div>
+                        <span className="barcode-text">{ticketInfo.barcode}</span>
+                      </div>
+                    </div>
+
+                    {/* Simulated NFC action */}
+                    <button 
+                      className="btn btn-primary"
+                      onClick={() => {
+                        alert(`NFC Signal Sent: Transmitted Ticket Barcode ${ticketInfo.barcode} to Gate B NFC Reader.`);
+                      }}
+                      style={{ width: '100%', padding: '0.6rem', fontSize: '0.75rem', borderRadius: 'var(--radius-sm)' }}
+                    >
+                      ⚡ Tap to Scan Gate NFC
+                    </button>
                   </div>
-                </div>
+                )}
+
+                {/* SUBVIEW: SMART NAVIGATION */}
+                {phoneSubView === 'navigation' && (
+                  <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '0.85rem', animation: 'fade-in-up 0.4s ease-out' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Navigation size={14} /> Seat Wayfinding Guide
+                      </span>
+                      <button onClick={() => setPhoneSubView('home')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>Back</button>
+                    </div>
+
+                    {/* Accessibility Toggle */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Accessibility size={14} style={{ color: 'var(--color-accent)' }} /> ADA Step-Free Routing
+                      </span>
+                      <button 
+                        onClick={() => setAccessibilityMode(!accessibilityMode)}
+                        style={{
+                          padding: '0.15rem 0.5rem',
+                          fontSize: '0.65rem',
+                          background: accessibilityMode ? 'var(--color-success)' : 'rgba(255,255,255,0.06)',
+                          border: 'none',
+                          color: '#fff',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        {accessibilityMode ? 'ON' : 'OFF'}
+                      </button>
+                    </div>
+
+                    <div className="navigation-guide-card" style={{ margin: 0, padding: '0.85rem' }}>
+                      <h4 style={{ fontSize: '0.8rem', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <Navigation size={12} style={{ color: 'var(--color-primary)' }} />
+                        Route: {accessibilityMode ? 'ADA Elevator Route' : `Gate ${ticketInfo.gate.split(' ')[0]} Standard`}
+                      </h4>
+                      
+                      {(() => {
+                        const currentWayfinding = (accessibilityMode && activeStadium.accessibilityWayfinding) ? activeStadium.accessibilityWayfinding : activeStadium.wayfinding;
+                        return currentWayfinding.map((stepItem, idx) => {
+                          const isDone = currentRouteStep > idx;
+                          const isActive = currentRouteStep === idx;
+                          return (
+                            <div key={idx} className={`nav-route-step ${isDone ? 'done' : isActive ? 'active' : ''}`} style={{ paddingBottom: idx === currentWayfinding.length - 1 ? 0 : '1rem' }}>
+                              <div className="nav-step-icon">
+                                {isDone ? <Check size={10} /> : isActive ? <Flame size={10} /> : idx + 1}
+                              </div>
+                              <div className="nav-step-text">
+                                <div className="nav-step-title" style={{ fontSize: '0.78rem' }}>{stepItem.title}</div>
+                                <div className="nav-step-desc" style={{ fontSize: '0.68rem' }}>{stepItem.desc}</div>
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+
+                    {/* Restroom Wait Time Tracker */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.65rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                        🚻 Restroom Wait-Times
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                        <span>Sec 124 (Male/Female)</span>
+                        <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>🟢 2 min queue</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                        <span>Sec 125 (ADA Accessible)</span>
+                        <span style={{ color: 'var(--color-warning)', fontWeight: 600 }}>🟡 6 min queue</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SUBVIEW: EXPRESS PICKUP (FOOD/DRINK) */}
+                {phoneSubView === 'pickup' && (
+                  <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '0.85rem', animation: 'fade-in-up 0.4s ease-out' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-warning)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Utensils size={14} /> Express Concessions
+                      </span>
+                      <button onClick={() => setPhoneSubView('home')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>Back</button>
+                    </div>
+
+                    <div className="food-preorder-section" style={{ gap: '0.6rem' }}>
+                      {/* Category Pills */}
+                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                        {['All', 'Plant-Based', 'Zero-Waste'].map(cat => (
+                          <button
+                            key={cat}
+                            onClick={() => setSelectedConcessionCategory(cat)}
+                            style={{
+                              padding: '0.15rem 0.45rem',
+                              fontSize: '0.62rem',
+                              background: selectedConcessionCategory === cat ? 'var(--color-primary)' : 'rgba(255,255,255,0.04)',
+                              border: `1px solid ${selectedConcessionCategory === cat ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                              color: selectedConcessionCategory === cat ? '#fff' : 'var(--text-primary)',
+                              borderRadius: '12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            {cat === 'Plant-Based' ? '🌱 Plant-Based' : cat === 'Zero-Waste' ? '♻️ Eco-Friendly' : '🍔 All'}
+                          </button>
+                        ))}
+                      </div>
+
+                      {concessionsList.length > 0 ? concessionsList.map((item) => (
+                        <div key={item.id} className="food-item-row" style={{ padding: '0.6rem', gap: '0.5rem' }}>
+                          <div className="food-info" style={{ flex: 1 }}>
+                            <span className="food-name" style={{ fontSize: '0.8rem' }}>{item.name}</span>
+                            <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                              <span className="food-price" style={{ fontSize: '0.75rem' }}>{item.price}</span>
+                              <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>{item.calories}</span>
+                            </div>
+                            {/* Sustainability Badges */}
+                            <div style={{ display: 'flex', gap: '0.2rem', marginTop: '0.1rem', flexWrap: 'wrap' }}>
+                              {item.sustainability && item.sustainability.map((badge, idx) => (
+                                <span key={idx} style={{
+                                  fontSize: '0.5rem',
+                                  background: badge.toLowerCase().includes('plant') ? 'rgba(16,185,129,0.12)' : 'rgba(59,130,246,0.12)',
+                                  color: badge.toLowerCase().includes('plant') ? '#34d399' : '#60a5fa',
+                                  border: `1px solid ${badge.toLowerCase().includes('plant') ? 'rgba(16,185,129,0.2)' : 'rgba(59,130,246,0.2)'}`,
+                                  padding: '0.01rem 0.15rem',
+                                  borderRadius: '3px',
+                                  fontWeight: 600
+                                }}>
+                                  {badge}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.2rem', justifyContent: 'center' }}>
+                            <span className="food-queue-time" style={{ fontSize: '0.62rem' }}>
+                              <Clock size={8} />
+                              {item.wait} wait
+                            </span>
+                            <button 
+                              className="btn" 
+                              onClick={() => handleOrderFood(item.name, item.price)}
+                              style={{ padding: '0.2rem 0.5rem', fontSize: '0.68rem', background: 'var(--color-primary)', borderRadius: '4px', color: '#fff' }}
+                            >
+                              Order
+                            </button>
+                          </div>
+                        </div>
+                      )) : (
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem 0' }}>
+                          No menu items match the selected eco-filter.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Active Orders List inside phone screen */}
+                    {orders.length > 0 && (
+                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', marginTop: '0.25rem' }}>
+                        <h5 style={{ fontSize: '0.75rem', marginBottom: '0.35rem', color: '#fff' }}>Your Active Vouchers</h5>
+                        {orders.map((ord) => (
+                          <div key={ord.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', padding: '0.25rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div>
+                              <span style={{ fontWeight: 600, color: '#fff' }}>{ord.name}</span>
+                              <span style={{ color: 'var(--text-secondary)', marginLeft: '0.3rem' }}>({ord.time})</span>
+                            </div>
+                            <span style={{ color: ord.status === 'READY FOR PICKUP' ? 'var(--color-success)' : 'var(--color-warning)', fontWeight: 600 }}>
+                              {ord.status}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Eco-Transit Tracker */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.65rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                      <h4 style={{ fontSize: '0.75rem', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#60a5fa' }}>
+                        <Globe size={10} style={{ color: 'var(--color-accent)' }} />
+                        Transit Carbon Rankings
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                        {activeStadium.transportation ? activeStadium.transportation.slice(0, 3).map((trans, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', padding: '0.1rem 0' }}>
+                            <div>
+                              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{trans.type}</span>
+                              <span style={{ color: 'var(--text-secondary)', marginLeft: '0.3rem' }}>({trans.wait})</span>
+                            </div>
+                            <span style={{
+                              fontSize: '0.58rem',
+                              background: trans.eco.includes('🌱') ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                              color: trans.eco.includes('🌱') ? '#34d399' : '#f87171',
+                              padding: '0.01rem 0.15rem',
+                              borderRadius: '3px',
+                              fontWeight: 600
+                            }}>
+                              {trans.eco}
+                            </span>
+                          </div>
+                        )) : (
+                          <div style={{ color: 'var(--text-secondary)', fontSize: '0.65rem' }}>Transit registry loading...</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SUBVIEW: LIVE AR OVERLAYS */}
+                {phoneSubView === 'ar' && (
+                  <div className="ar-overlay-view" style={{ animation: 'fade-in-scale 0.4s ease-out' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-purple)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Eye size={14} /> Live AR overlay
+                      </span>
+                      <button onClick={() => setPhoneSubView('home')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>Back</button>
+                    </div>
+
+                    {/* AR Feed Screen */}
+                    <div className="ar-feed-mock">
+                      <div className="ar-pitch-grid"></div>
+                      <div className="ar-pitch-lines"></div>
+                      
+                      {/* Simulated Crosshair */}
+                      <div className="ar-crosshair"></div>
+
+                      {/* Simulated Player 1: Lionel Messi */}
+                      {arSpeedTracker && (
+                        <>
+                          <div className="ar-player-dot pulse messi" style={{ top: '40%', left: '35%' }}></div>
+                          <div className="ar-player-tag messi" style={{ top: '24%', left: '20%' }}>
+                            <span style={{ fontWeight: 800, color: '#fff' }}>L. Messi (ARG)</span>
+                            <span style={{ color: 'var(--color-primary)' }}>Speed: 31.4 km/h</span>
+                            <span style={{ color: 'var(--color-success)', fontSize: '0.52rem' }}>xG: 0.78 | 2 Goals</span>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Simulated Player 2: Kylian Mbappe */}
+                      {arSpeedTracker && (
+                        <>
+                          <div className="ar-player-dot pulse mbappe" style={{ top: '65%', left: '70%' }}></div>
+                          <div className="ar-player-tag mbappe" style={{ top: '49%', left: '55%' }}>
+                            <span style={{ fontWeight: 800, color: '#fff' }}>K. Mbappé (FRA)</span>
+                            <span style={{ color: 'var(--color-purple)' }}>Speed: 34.8 km/h</span>
+                            <span style={{ color: 'var(--color-success)', fontSize: '0.52rem' }}>xG: 0.65 | 1 Goal</span>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Tactical Positioning Grid HUD Lines */}
+                      {arTacticalGrid && (
+                        <div style={{ position: 'absolute', inset: 0, border: '1px dashed rgba(224, 159, 62, 0.45)', pointerEvents: 'none' }}>
+                          <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, borderLeft: '1px dashed rgba(224, 159, 62, 0.45)' }}></div>
+                          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '1px dashed rgba(224, 159, 62, 0.45)' }}></div>
+                          <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '0.55rem', color: 'var(--color-primary)', fontFamily: 'var(--mono)', textTransform: 'uppercase' }}>Tactical Grid Overlay</div>
+                        </div>
+                      )}
+
+                      {/* Pass Map HUD Lines */}
+                      {arPassMap && (
+                        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+                          <path d="M 120 152 L 245 285" stroke="var(--color-primary)" strokeWidth="1.5" strokeDasharray="4 2" fill="none" />
+                          <circle cx="245" cy="285" r="3" fill="var(--color-primary)" />
+                          <path d="M 245 285 Q 200 200 130 152" stroke="var(--color-success)" strokeWidth="2" strokeDasharray="3 3" fill="none">
+                            <animate attributeName="stroke-dashoffset" values="20;0" dur="2s" repeatCount="indefinite" />
+                          </path>
+                          <text x="200" y="240" fill="var(--color-success)" fontSize="8" fontFamily="var(--mono)">Pass Assist Mode</text>
+                        </svg>
+                      )}
+
+                      {/* HUD bottom panel */}
+                      <div className="ar-hud-panel">
+                        <div className="ar-hud-stat">
+                          <span className="ar-hud-label">Tactical State</span>
+                          <span className="ar-hud-value" style={{ color: 'var(--color-primary)' }}>ARG Posession (54%)</span>
+                        </div>
+                        <div className="ar-hud-stat" style={{ textAlign: 'right' }}>
+                          <span className="ar-hud-label">Signal GPS</span>
+                          <span className="ar-hud-value" style={{ color: 'var(--color-success)' }}>RTK HIGH 99%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AR Toggles HUD Controls */}
+                    <div className="ar-control-panel-hud">
+                      <h5 style={{ fontSize: '0.72rem', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.2rem', marginBottom: '0.2rem' }}>AR Display Overlays</h5>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', cursor: 'pointer' }}>
+                          <span>Player Telemetry & Speed</span>
+                          <input 
+                            type="checkbox" 
+                            checked={arSpeedTracker} 
+                            onChange={(e) => setArSpeedTracker(e.target.checked)} 
+                            style={{ accentColor: 'var(--color-primary)' }}
+                          />
+                        </label>
+
+                        <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', cursor: 'pointer' }}>
+                          <span>Predictive Pass Vectors</span>
+                          <input 
+                            type="checkbox" 
+                            checked={arPassMap} 
+                            onChange={(e) => setArPassMap(e.target.checked)} 
+                            style={{ accentColor: 'var(--color-primary)' }}
+                          />
+                        </label>
+
+                        <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', cursor: 'pointer' }}>
+                          <span>Tactical Spacing Grid</span>
+                          <input 
+                            type="checkbox" 
+                            checked={arTacticalGrid} 
+                            onChange={(e) => setArTacticalGrid(e.target.checked)} 
+                            style={{ accentColor: 'var(--color-primary)' }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Dock Navigation Bar - Sticky (Within Thumb Reach for One-Handed Stadium Use) */}
+              <div className="phone-bottom-nav">
+                <button 
+                  className={`phone-nav-btn ${phoneSubView === 'home' ? 'active' : ''}`} 
+                  onClick={() => setPhoneSubView('home')}
+                >
+                  <Home size={16} />
+                  <span>Home</span>
+                </button>
+                <button 
+                  className={`phone-nav-btn ${phoneSubView === 'ticket' ? 'active' : ''}`} 
+                  onClick={() => setPhoneSubView('ticket')}
+                >
+                  <Ticket size={16} />
+                  <span>Wallet</span>
+                </button>
+                <button 
+                  className={`phone-nav-btn ${phoneSubView === 'navigation' ? 'active' : ''}`} 
+                  onClick={() => setPhoneSubView('navigation')}
+                >
+                  <Navigation size={16} />
+                  <span>Routes</span>
+                </button>
+                <button 
+                  className={`phone-nav-btn ${phoneSubView === 'pickup' ? 'active' : ''}`} 
+                  onClick={() => setPhoneSubView('pickup')}
+                >
+                  <Utensils size={16} />
+                  <span>Food</span>
+                </button>
+                <button 
+                  className={`phone-nav-btn ${phoneSubView === 'ar' ? 'active' : ''}`} 
+                  onClick={() => setPhoneSubView('ar')}
+                >
+                  <Eye size={16} />
+                  <span>AR Mode</span>
+                </button>
               </div>
             </div>
 
