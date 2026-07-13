@@ -457,7 +457,7 @@ function App() {
   const runAutomatedTests = async () => {
     setIsTestingAll(true);
     setTestConsoleLogs([]);
-    addTestLog('🚀 Initializing ArenaFlow AI Test Runner Suite...');
+    addTestLog('🚀 Initializing ArenaFlow Test Runner Suite...');
 
     const currentResults = [
       { id: 'normal', name: 'Normal Data Ingestion', status: 'running', details: 'Validating config schema injection...' },
@@ -887,7 +887,7 @@ function App() {
     setMessages([
       {
         sender: 'ai',
-        text: `🛡️ **Stadium Operations Console Online.** I am **ArenaFlow AI**, your real-time operations coordinator for **${activeStadium.name}** during the match **${activeStadium.currentMatch}**.\n\nUse the persistent **Live Intelligence Feed** on the left to track verified events (Emerald) and predictive/speculative risks (Amber).\n\nChoose from the context-aware **Actionable Chips** above the input bar to quickly trigger tactical protocols.`,
+        text: `🛡️ **Stadium Operations Console Online.** I am **ArenaFlow**, your real-time operations coordinator for **${activeStadium.name}** during the match **${activeStadium.currentMatch}**.\n\nUse the persistent **Live Intelligence Feed** on the left to track verified events (Emerald) and predictive/speculative risks (Amber).\n\nChoose from the context-aware **Actionable Chips** above the input bar to quickly trigger tactical protocols.`,
         reasoning: `Initialized operations assistant context for ${activeStadium.name} and match ${activeStadium.currentMatch}.`
       }
     ]);
@@ -1421,7 +1421,7 @@ function App() {
       // Live Gemini call if API Key is inputted
       if (geminiApiKey) {
         try {
-          const promptWithContext = `You are ArenaFlow AI, an operations assistant system for ${activeStadium.name} during the match ${activeStadium.currentMatch}.
+          const promptWithContext = `You are ArenaFlow, an operations assistant system for ${activeStadium.name} during the match ${activeStadium.currentMatch}.
           
           Operational context:
           - North Stand: Normal flow (density 32%)
@@ -1540,7 +1540,7 @@ function App() {
           <Activity className="brand-icon" size={28} style={{ color: 'var(--theme-accent-country)', filter: 'drop-shadow(0 0 6px var(--theme-accent-country-glow))' }} />
           <div>
             <h1 className="brand-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', lineHeight: '1' }}>
-              ArenaFlow <span style={{ color: 'var(--theme-accent-country)', fontSize: '0.95rem', fontWeight: '800' }}>AI</span>
+              ArenaFlow
             </h1>
             <div style={{ fontSize: '0.55rem', letterSpacing: '0.75px', fontWeight: '800', color: 'var(--color-primary)', textTransform: 'uppercase', marginTop: '0.1rem', opacity: 0.85 }}>
               FIFA WORLD CUP 2026™ OPERATIONS HUB
@@ -4307,7 +4307,7 @@ function App() {
                   🏆 Evaluation Checklist
                 </h3>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                  ArenaFlow AI meets or exceeds all criteria for a top-tier score on the tournament leaderboard:
+                  ArenaFlow meets or exceeds all criteria for a top-tier score on the tournament leaderboard:
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8rem', marginTop: '0.5rem' }}>

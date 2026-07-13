@@ -26,7 +26,7 @@ genai.configure(api_key=api_key)
 SYSTEM_PROMPT = """You are an expert stadium logistics architect and JSON data engineer.
 Your task is to analyze the provided stadium seating blueprint, floor plan, or CAD image, and extract its spatial and logistical properties into a strict JSON configuration block.
 
-This JSON block will be injected directly into the ArenaFlow AI React frontend.
+This JSON block will be injected directly into the ArenaFlow React frontend.
 
 The JSON MUST follow this exact structure (do not include markdown blocks, just raw JSON):
 {

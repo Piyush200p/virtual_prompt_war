@@ -1,7 +1,7 @@
 # Directive: Fan Experience Agent
 
 ## 🎯 Goal
-Upgrade the **Fan Experience Portal** (Attendee Mockup) in the ArenaFlow AI dashboard to incorporate inclusive accessibility solutions, eco-friendly transportation guides, and sustainable food options during the FIFA World Cup 2026.
+Upgrade the **Fan Experience Portal** (Attendee Mockup) in the ArenaFlow dashboard to incorporate inclusive accessibility solutions, eco-friendly transportation guides, and sustainable food options during the FIFA World Cup 2026.
 
 ---
 

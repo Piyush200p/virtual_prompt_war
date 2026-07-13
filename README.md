@@ -1,7 +1,7 @@
-# 🏟️ ArenaFlow AI — Smart Stadiums & Tournament Operations
+# 🏟️ ArenaFlow — Smart Stadiums & Tournament Operations
 ### 🏆 Google PromptWars Challenge 4: FIFA World Cup 2026 Innovation
 
-**ArenaFlow AI** is a cutting-edge, dual-portal Generative AI control center and wayfinding assistant designed to optimize stadium operations and elevate the fan experience during the FIFA World Cup 2026. 
+**ArenaFlow** is a cutting-edge, dual-portal Generative AI control center and wayfinding assistant designed to optimize stadium operations and elevate the fan experience during the FIFA World Cup 2026. 
 
 Live Demo/Deployment: **[https://piyush200p.github.io/virtual_prompt_war/](https://piyush200p.github.io/virtual_prompt_war/)**  
 GitHub Repository: **[https://github.com/Piyush200p/virtual_prompt_war](https://github.com/Piyush200p/virtual_prompt_war)**
@@ -21,7 +21,7 @@ GitHub Repository: **[https://github.com/Piyush200p/virtual_prompt_war](https://
 ## 🏟️ Project Vision & Core Objectives
 Managing stadium operations during the FIFA World Cup is a massive logistical challenge, characterized by high crowd densities, ticketing glitches, safety hazards, and visitor navigation confusion. 
 
-**ArenaFlow AI** solves these issues by uniting the two sides of stadium operations into a single cohesive interface:
+**ArenaFlow** solves these issues by uniting the two sides of stadium operations into a single cohesive interface:
 - **Operations Managers** receive AI-assisted incident dispatch and telemetry maps.
 - **Fans** receive real-time, context-aware smart guidance, concession pre-orders, and emergency assistance.
 
@@ -48,7 +48,7 @@ Managing stadium operations during the FIFA World Cup is a massive logistical ch
 ---
 
 ## 🧠 Generative AI & Prompt Engineering Strategy
-The AI capabilities in **ArenaFlow AI** are grounded in modern prompt engineering patterns:
+The AI capabilities in **ArenaFlow** are grounded in modern prompt engineering patterns:
 
 ### A. Context-Aware Prompt Injection
 When querying the Gemini API, the assistant automatically wraps the user's prompt with rich stadium telemetry. The model doesn't just receive the question; it receives:

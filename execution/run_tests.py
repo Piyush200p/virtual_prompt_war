@@ -5,7 +5,7 @@ from pathlib import Path
 
 def run_test_suite():
     print("====================================================")
-    print("ArenaFlow AI: Automated Execution-Layer Test Suite")
+    print("ArenaFlow: Automated Execution-Layer Test Suite")
     print("====================================================")
     
     tests_passed = 0

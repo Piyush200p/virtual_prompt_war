@@ -1,7 +1,7 @@
 # Directive: Operations Agent
 
 ## 🎯 Goal
-Enhance the **Tournament Operations Command** in the ArenaFlow AI dashboard to support green/sustainable stadium practices, volunteer and venue staff coordination, and AI-driven decision support during the FIFA World Cup 2026.
+Enhance the **Tournament Operations Command** in the ArenaFlow dashboard to support green/sustainable stadium practices, volunteer and venue staff coordination, and AI-driven decision support during the FIFA World Cup 2026.
 
 ---
 
