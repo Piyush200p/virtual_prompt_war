@@ -1851,7 +1851,7 @@ function App() {
         {activeTab === 'operations' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* FIFA World Cup 2026 Live Stats Summary Widget */}
-            <div className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--theme-accent-country, var(--border-color))', background: 'linear-gradient(135deg, rgba(20,24,31,0.6) 0%, rgba(12,15,20,0.8) 100%)', position: 'relative', overflow: 'hidden', transition: 'all 0.3s ease' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--theme-accent-country, var(--border-color))', background: 'var(--gradient-stats-card)', position: 'relative', overflow: 'hidden', transition: 'all 0.3s ease' }}>
               <div style={{ position: 'absolute', top: '-15px', right: '-10px', fontSize: '4.5rem', opacity: 0.08, pointerEvents: 'none', fontWeight: 900, fontFamily: 'var(--heading)', color: 'var(--text-primary)' }}>2026</div>
               <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.85rem' }}>
                 🏆 FIFA World Cup 2026™ Tournament Live Metrics

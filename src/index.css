@@ -49,29 +49,43 @@
   --shadow-neon-green: 0 0 16px rgba(46, 194, 126, 0.15);
   --shadow-neon-red: 0 0 16px rgba(229, 83, 75, 0.15);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --gradient-stats-card: linear-gradient(135deg, rgba(20, 24, 31, 0.6) 0%, rgba(12, 15, 20, 0.8) 100%);
 
   color-scheme: dark;
 }
 
 /* Light Mode Overrides */
 [data-theme="light"] {
-  --bg-primary: #f4f5f7;
-  --bg-secondary: #ebedf0;
-  --bg-tertiary: #ffffff;
-  --bg-elevated: rgba(255, 255, 255, 0.85);
-  --text-primary: #1a1d23;
-  --text-secondary: #555b67;
-  --text-muted: #9ca3af;
+  --bg-primary: #F8FAFC;        /* Soft off-white background */
+  --bg-secondary: #FFFFFF;      /* Pure white surface cards */
+  --bg-tertiary: #F1F5F9;       /* Slate-light background elements */
+  --bg-elevated: #FFFFFF;       /* Pure white elevated elements */
+  --text-primary: #0F172A;      /* Deep navy for primary headings */
+  --text-secondary: #475569;    /* Slate gray for secondary labels */
+  --text-muted: #64748B;        /* Slate gray for muted helper text */
 
-  --color-primary: #c47d1a;
-  --color-primary-glow: rgba(196, 125, 26, 0.10);
-  --color-accent: #3b82f6;
+  /* Boosted status colors (+10% saturation) for daylight visibility */
+  --color-primary: #d97706;      /* Saturated Amber (stadium signature) */
+  --color-primary-glow: rgba(217, 119, 6, 0.08);
+  --color-accent: #2563EB;       /* Saturated scoreboard blue */
+  
+  --color-success: #059669;      /* Saturated Turf Green / Emerald */
+  --color-success-glow: rgba(5, 150, 105, 0.08);
+  --color-warning: #ea580c;      /* Saturated Flare Orange */
+  --color-warning-glow: rgba(234, 88, 12, 0.08);
+  --color-danger: #dc2626;       /* Saturated Red Card / Crimson */
+  --color-danger-glow: rgba(220, 38, 38, 0.08);
+  --color-purple: #7c3aed;       /* Saturated Violet */
+  --color-purple-glow: rgba(124, 58, 237, 0.08);
 
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-focus: rgba(196, 125, 26, 0.4);
+  --border-color: rgba(15, 23, 42, 0.05); /* Soft, barely visible borders */
+  --border-focus: rgba(217, 119, 6, 0.4);
 
-  --shadow-glow: 0 0 20px rgba(196, 125, 26, 0.08);
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 4px 20px rgba(217, 119, 6, 0.04);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);  /* Very soft diffused shadow instead of borders */
+  --shadow-neon-green: 0 0 16px rgba(5, 150, 105, 0.12);
+  --shadow-neon-red: 0 0 16px rgba(220, 38, 38, 0.12);
+  --gradient-stats-card: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.95) 100%);
 
   color-scheme: light;
 }
@@ -141,30 +155,122 @@ body {
 [data-theme="light"] body {
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% 120%, rgba(196, 125, 26, 0.04) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 85% 0%, rgba(59, 130, 246, 0.03) 0%, transparent 45%);
+    radial-gradient(ellipse 80% 60% at 50% 120%, rgba(15, 23, 42, 0.015) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 85% 0%, rgba(217, 119, 6, 0.015) 0%, transparent 45%);
   color: var(--text-primary);
 }
 [data-theme="light"] .app-header {
-  background: rgba(255, 255, 255, 0.92);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 [data-theme="light"] .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  background: var(--bg-secondary);
+  border-color: rgba(15, 23, 42, 0.03);
+  box-shadow: var(--shadow-card);
 }
 [data-theme="light"] .nav-tab-btn {
-  color: #1e293b;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 [data-theme="light"] .nav-tab-btn:hover {
-  color: #000000;
-  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-primary);
+  background: rgba(15, 23, 42, 0.04);
 }
-[data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-secondary); }
-[data-theme="light"] ::-webkit-scrollbar-thumb { background: #ccc; }
+[data-theme="light"] .nav-tab-btn.active {
+  color: #FFFFFF !important;
+  background: var(--color-primary) !important;
+  border: 1px solid var(--color-primary) !important;
+  outline: 2px solid rgba(217, 119, 6, 0.25) !important;
+}
+[data-theme="light"] .navigation-tabs {
+  background: rgba(15, 23, 42, 0.03);
+  border-color: rgba(15, 23, 42, 0.05);
+}
+[data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-primary); }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.15); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.25); }
+
+/* Operations Dashboard Elements */
+[data-theme="light"] .map-visualizer {
+  background: rgba(15, 23, 42, 0.015);
+  border-color: rgba(15, 23, 42, 0.04);
+}
+[data-theme="light"] .stadium-sector {
+  fill: rgba(15, 23, 42, 0.03);
+  stroke: rgba(15, 23, 42, 0.08);
+}
+[data-theme="light"] .stadium-sector:hover {
+  stroke: var(--text-primary);
+}
+
+/* AI Operations Assistant Elements */
+[data-theme="light"] .intelligence-feed-container {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(15, 23, 42, 0.03) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+[data-theme="light"] .chat-room-container {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(15, 23, 42, 0.03) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+[data-theme="light"] .chat-messages-feed {
+  background: rgba(15, 23, 42, 0.01) !important;
+  border-color: rgba(15, 23, 42, 0.03) !important;
+}
+[data-theme="light"] .insight-card {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(15, 23, 42, 0.03) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+[data-theme="light"] .insight-card:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+}
+[data-theme="light"] .insight-card.verified {
+  border-left: 3px solid var(--color-success) !important;
+}
+[data-theme="light"] .insight-card.speculative {
+  border-left: 3px solid var(--color-warning) !important;
+}
+[data-theme="light"] .action-chip {
+  background: rgba(15, 23, 42, 0.025) !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+  color: var(--text-secondary) !important;
+}
+[data-theme="light"] .action-chip:hover {
+  background: rgba(217, 119, 6, 0.05) !important;
+  border-color: rgba(217, 119, 6, 0.2) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .chat-input-row .chat-input {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(15, 23, 42, 0.06) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .feed-filter-btn {
+  color: var(--text-secondary) !important;
+}
+[data-theme="light"] .feed-filter-btn:hover {
+  color: var(--text-primary) !important;
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+[data-theme="light"] .feed-filter-btn.active {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+[data-theme="light"] .feed-filter-btn.active.verified {
+  background: rgba(5, 150, 105, 0.08) !important;
+  color: #059669 !important;
+  border-color: rgba(5, 150, 105, 0.2) !important;
+}
+[data-theme="light"] .feed-filter-btn.active.speculative {
+  background: rgba(217, 119, 6, 0.08) !important;
+  color: #d97706 !important;
+  border-color: rgba(217, 119, 6, 0.2) !important;
+}
 
 .brand {
   display: flex;
