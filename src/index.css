@@ -1996,6 +1996,21 @@ body::after {
   color: var(--color-primary);
   filter: drop-shadow(0 0 4px rgba(224, 159, 62, 0.4));
 }
+.phone-nav-btn.active.nav-home {
+  color: var(--color-success) !important;
+  filter: drop-shadow(0 0 8px rgba(46, 194, 126, 0.6)) !important;
+  position: relative;
+}
+.phone-nav-btn.active.nav-home::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  width: 12px;
+  height: 2.5px;
+  background: var(--color-success);
+  border-radius: 1px;
+  box-shadow: 0 0 6px var(--color-success);
+}
 
 /* Adjust phone screen height to make room for bottom nav */
 .phone-screen {
@@ -2003,9 +2018,38 @@ body::after {
 }
 
 /* Dynamic Context Header Card */
+/* Keyframes for Pulse animation */
+@keyframes pulse-amber {
+  0% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(224, 159, 62, 0.4); border-color: rgba(224, 159, 62, 0.6); }
+  70% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 6px rgba(224, 159, 62, 0); border-color: rgba(224, 159, 62, 0.3); }
+  100% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(224, 159, 62, 0); border-color: rgba(224, 159, 62, 0.6); }
+}
+@keyframes pulse-orange {
+  0% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(255, 123, 71, 0.4); border-color: rgba(255, 123, 71, 0.6); }
+  70% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 6px rgba(255, 123, 71, 0); border-color: rgba(255, 123, 71, 0.3); }
+  100% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(255, 123, 71, 0); border-color: rgba(255, 123, 71, 0.6); }
+}
+@keyframes pulse-cyan {
+  0% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(91, 155, 213, 0.4); border-color: rgba(91, 155, 213, 0.6); }
+  70% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 6px rgba(91, 155, 213, 0); border-color: rgba(91, 155, 213, 0.3); }
+  100% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(91, 155, 213, 0); border-color: rgba(91, 155, 213, 0.6); }
+}
+@keyframes pulse-purple {
+  0% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(157, 140, 214, 0.4); border-color: rgba(157, 140, 214, 0.6); }
+  70% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 6px rgba(157, 140, 214, 0); border-color: rgba(157, 140, 214, 0.3); }
+  100% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(157, 140, 214, 0); border-color: rgba(157, 140, 214, 0.6); }
+}
+@keyframes pulse-green {
+  0% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(46, 194, 126, 0.4); border-color: rgba(46, 194, 126, 0.6); }
+  70% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 6px rgba(46, 194, 126, 0); border-color: rgba(46, 194, 126, 0.3); }
+  100% { box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 0px rgba(46, 194, 126, 0); border-color: rgba(46, 194, 126, 0.6); }
+}
+
 .context-header-card {
-  background: linear-gradient(135deg, rgba(20, 24, 33, 0.8) 0%, rgba(12, 15, 22, 0.9) 100%);
-  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px) saturate(1.8);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
   border-radius: var(--radius-md);
   padding: 0.9rem 1rem;
   position: relative;
@@ -2033,8 +2077,7 @@ body::after {
 }
 
 .context-header-card.glow-amber {
-  border-color: rgba(224, 159, 62, 0.25);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(224, 159, 62, 0.04);
+  animation: pulse-amber 2.5s infinite;
 }
 .context-header-card.glow-amber:hover {
   border-color: var(--color-primary);
@@ -2043,8 +2086,7 @@ body::after {
 }
 
 .context-header-card.glow-orange {
-  border-color: rgba(255, 123, 71, 0.25);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(255, 123, 71, 0.04);
+  animation: pulse-orange 2.5s infinite;
 }
 .context-header-card.glow-orange:hover {
   border-color: var(--color-warning);
@@ -2053,8 +2095,7 @@ body::after {
 }
 
 .context-header-card.glow-cyan {
-  border-color: rgba(91, 155, 213, 0.25);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(91, 155, 213, 0.04);
+  animation: pulse-cyan 2.5s infinite;
 }
 .context-header-card.glow-cyan:hover {
   border-color: var(--color-accent);
@@ -2063,8 +2104,7 @@ body::after {
 }
 
 .context-header-card.glow-purple {
-  border-color: rgba(157, 140, 214, 0.25);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(157, 140, 214, 0.04);
+  animation: pulse-purple 2.5s infinite;
 }
 .context-header-card.glow-purple:hover {
   border-color: var(--color-purple);
@@ -2073,8 +2113,7 @@ body::after {
 }
 
 .context-header-card.glow-green {
-  border-color: rgba(46, 194, 126, 0.25);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(46, 194, 126, 0.04);
+  animation: pulse-green 2.5s infinite;
 }
 .context-header-card.glow-green:hover {
   border-color: var(--color-success);
@@ -2136,6 +2175,9 @@ body::after {
 }
 
 /* Express Pickup Style */
+.action-tile.tile-orange {
+  box-shadow: inset 0 0 12px rgba(255, 123, 71, 0.06), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
 .action-tile.tile-orange .action-tile-icon-wrap {
   background: rgba(255, 123, 71, 0.1);
   color: var(--color-warning);
@@ -2146,6 +2188,9 @@ body::after {
 }
 
 /* Smart Navigation Style */
+.action-tile.tile-blue {
+  box-shadow: inset 0 0 12px rgba(91, 155, 213, 0.06), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
 .action-tile.tile-blue .action-tile-icon-wrap {
   background: rgba(91, 155, 213, 0.1);
   color: var(--color-accent);
@@ -2156,6 +2201,9 @@ body::after {
 }
 
 /* Live AR Overlays Style */
+.action-tile.tile-purple {
+  box-shadow: inset 0 0 12px rgba(157, 140, 214, 0.06), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
 .action-tile.tile-purple .action-tile-icon-wrap {
   background: rgba(157, 140, 214, 0.1);
   color: var(--color-purple);
@@ -2166,6 +2214,9 @@ body::after {
 }
 
 /* Digital ID Style */
+.action-tile.tile-green {
+  box-shadow: inset 0 0 12px rgba(46, 194, 126, 0.06), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
 .action-tile.tile-green .action-tile-icon-wrap {
   background: rgba(46, 194, 126, 0.1);
   color: var(--color-success);
@@ -2185,7 +2236,8 @@ body::after {
 
 .action-tile-subtitle {
   font-size: 0.65rem;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.85); /* Brighter high-contrast silver/white */
+  font-weight: 500; /* Heavier weight */
   line-height: 1.2;
 }
 

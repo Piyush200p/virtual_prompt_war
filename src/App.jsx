@@ -3299,7 +3299,7 @@ function App() {
                           </div>
                           <span style={{
                             fontSize: '0.55rem', background: 'rgba(255, 123, 71, 0.15)',
-                            color: 'var(--color-warning)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                            color: 'var(--color-warning)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 600
                           }}>PRE-ORDER</span>
                         </div>
                         <div style={{ marginTop: '0.35rem' }}>
@@ -3319,7 +3319,7 @@ function App() {
                           </div>
                           <span style={{
                             fontSize: '0.55rem', background: 'rgba(91, 155, 213, 0.15)',
-                            color: 'var(--color-accent)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                            color: 'var(--color-accent)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 600
                           }}>ROUTE</span>
                         </div>
                         <div style={{ marginTop: '0.35rem' }}>
@@ -3339,7 +3339,7 @@ function App() {
                           </div>
                           <span style={{
                             fontSize: '0.55rem', background: 'rgba(157, 140, 214, 0.15)',
-                            color: 'var(--color-purple)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                            color: 'var(--color-purple)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 600
                           }}>CAMERA</span>
                         </div>
                         <div style={{ marginTop: '0.35rem' }}>
@@ -3359,7 +3359,7 @@ function App() {
                           </div>
                           <span style={{
                             fontSize: '0.55rem', background: 'rgba(46, 194, 126, 0.15)',
-                            color: 'var(--color-success)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700
+                            color: 'var(--color-success)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 600
                           }}>PASS</span>
                         </div>
                         <div style={{ marginTop: '0.35rem' }}>
@@ -3918,38 +3918,38 @@ function App() {
               {/* Bottom Dock Navigation Bar - Sticky (Within Thumb Reach for One-Handed Stadium Use) */}
               <div className="phone-bottom-nav">
                 <button 
-                  className={`phone-nav-btn ${phoneSubView === 'home' ? 'active' : ''}`} 
+                  className={`phone-nav-btn nav-home ${phoneSubView === 'home' ? 'active' : ''}`} 
                   onClick={() => setPhoneSubView('home')}
                 >
-                  <Home size={16} />
+                  <Home size={16} strokeWidth={2} />
                   <span>Home</span>
                 </button>
                 <button 
                   className={`phone-nav-btn ${phoneSubView === 'ticket' ? 'active' : ''}`} 
                   onClick={() => setPhoneSubView('ticket')}
                 >
-                  <Ticket size={16} />
+                  <Ticket size={16} strokeWidth={2} />
                   <span>Wallet</span>
                 </button>
                 <button 
                   className={`phone-nav-btn ${phoneSubView === 'navigation' ? 'active' : ''}`} 
                   onClick={() => setPhoneSubView('navigation')}
                 >
-                  <Navigation size={16} />
+                  <Navigation size={16} strokeWidth={2} />
                   <span>Routes</span>
                 </button>
                 <button 
                   className={`phone-nav-btn ${phoneSubView === 'pickup' ? 'active' : ''}`} 
                   onClick={() => setPhoneSubView('pickup')}
                 >
-                  <Utensils size={16} />
+                  <Utensils size={16} strokeWidth={2} />
                   <span>Food</span>
                 </button>
                 <button 
                   className={`phone-nav-btn ${phoneSubView === 'ar' ? 'active' : ''}`} 
                   onClick={() => setPhoneSubView('ar')}
                 >
-                  <Eye size={16} />
+                  <Eye size={16} strokeWidth={2} />
                   <span>AR Mode</span>
                 </button>
               </div>
