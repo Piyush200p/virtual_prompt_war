@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Shield, 
   AlertTriangle, 
-  CheckCircle, 
   MessageSquare, 
   User, 
   Ticket, 
-  MapPin, 
   Clock, 
   Compass, 
   Coffee, 
@@ -23,9 +21,6 @@ import {
   Navigation,
   Eye,
   Play,
-  Pause,
-  Users,
-  LogOut,
   Cpu,
   Accessibility,
   Globe,
@@ -528,7 +523,7 @@ function App() {
     } else {
       setVolunteerTasks([]);
     }
-  }, [currentStadiumId, stadiumsRegistry]);
+  }, [activeStadium]);
 
   // Sync theme attribute with state
   useEffect(() => {
@@ -813,7 +808,6 @@ function App() {
   const [isDispatching, setIsDispatching] = useState(false);
 
   // Fan Portal State
-  const [selectedGate, setSelectedGate] = useState('Gate B');
   const [currentRouteStep, setCurrentRouteStep] = useState(1);
   const [orders, setOrders] = useState([]);
   const [activeOrderMsg, setActiveOrderMsg] = useState('');
@@ -1030,7 +1024,7 @@ function App() {
         reasoning: `Initialized operations assistant context for ${activeStadium.name} and match ${activeStadium.currentMatch}.`
       }
     ]);
-  }, [currentStadiumId]);
+  }, [currentStadiumId, activeStadium.name, activeStadium.currentMatch]);
 
   // Dynamically append new insights based on active simulation phase
   useEffect(() => {
@@ -1447,42 +1441,53 @@ function App() {
 
   // API Call to Gemini
   const callGeminiAPI = async (promptText) => {
-    try {
-      // Map selected UI model route to actual Gemini API model endpoints
-      let apiModel = 'gemini-1.5-flash';
-      if (selectedRouteModel === 'flash_3_5_low') {
-        apiModel = 'gemini-1.5-flash';
-      } else if (selectedRouteModel === 'flash_3_5_medium') {
-        apiModel = 'gemini-2.0-flash';
-      } else if (selectedRouteModel === 'flash_3_5_high') {
-        apiModel = 'gemini-2.5-flash';
-      } else if (selectedRouteModel === 'sonnet_4_6_thinking') {
-        apiModel = 'gemini-2.0-flash-thinking-exp';
-      } else if (selectedRouteModel === 'opus_4_6') {
-        apiModel = 'gemini-1.5-pro';
-      }
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
-          })
-        }
-      );
-      const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
-    } catch (e) {
-      throw e;
+    if (!geminiApiKey) return null;
+    
+    // Security check: validate Google Gemini API key format (must start with AIzaSy)
+    if (!geminiApiKey.startsWith('AIzaSy')) {
+      console.warn("Invalid Gemini API key format. Skipping API request.");
+      return null;
     }
+
+    // Map selected UI model route to actual Gemini API model endpoints
+    let apiModel = 'gemini-1.5-flash';
+    if (selectedRouteModel === 'flash_3_5_low') {
+      apiModel = 'gemini-1.5-flash';
+    } else if (selectedRouteModel === 'flash_3_5_medium') {
+      apiModel = 'gemini-2.0-flash';
+    } else if (selectedRouteModel === 'flash_3_5_high') {
+      apiModel = 'gemini-2.5-flash';
+    } else if (selectedRouteModel === 'sonnet_4_6_thinking') {
+      apiModel = 'gemini-2.0-flash-thinking-exp';
+    } else if (selectedRouteModel === 'opus_4_6') {
+      apiModel = 'gemini-1.5-pro';
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${geminiApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }]
+        })
+      }
+    );
+    const data = await response.json();
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+      return data.candidates[0].content.parts[0].text;
+    }
+    throw new Error(data.error ? data.error.message : "Invalid response from Gemini API");
   };
 
   // AI Assistant Query handling
   const handleSendChat = async (presetText = null) => {
-    const query = presetText || userInput;
-    if (!query.trim()) return;
+    const rawQuery = presetText || userInput;
+    if (!rawQuery.trim()) return;
+
+    // Security check: Sanitize input query to strip out HTML tags and prevent potential XSS injection
+    const query = rawQuery.replace(/<[^>]*>/g, '').trim();
+    if (!query) return;
 
     const userMessage = { sender: 'user', text: query };
     setMessages((prev) => [...prev, userMessage]);
@@ -2334,6 +2339,10 @@ function App() {
                       onClick={() => setSelectedSector('North Stand')}
                       onMouseEnter={() => setHoveredSector('North Stand')}
                       onMouseLeave={() => setHoveredSector(null)}
+                      tabIndex={0}
+                      role="button"
+                      aria-label="Select North Stand sector metrics"
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedSector('North Stand'); } }}
                     />
                     
                     {/* East Stand Sector */}
@@ -2343,6 +2352,10 @@ function App() {
                       onClick={() => setSelectedSector('East Stand')}
                       onMouseEnter={() => setHoveredSector('East Stand')}
                       onMouseLeave={() => setHoveredSector(null)}
+                      tabIndex={0}
+                      role="button"
+                      aria-label="Select East Stand sector metrics"
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedSector('East Stand'); } }}
                     />
 
                     {/* South Stand Sector */}
@@ -2352,6 +2365,10 @@ function App() {
                       onClick={() => setSelectedSector('South Stand')}
                       onMouseEnter={() => setHoveredSector('South Stand')}
                       onMouseLeave={() => setHoveredSector(null)}
+                      tabIndex={0}
+                      role="button"
+                      aria-label="Select South Stand sector metrics"
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedSector('South Stand'); } }}
                     />
 
                     {/* West Stand Sector */}
@@ -2361,6 +2378,10 @@ function App() {
                       onClick={() => setSelectedSector('West Stand')}
                       onMouseEnter={() => setHoveredSector('West Stand')}
                       onMouseLeave={() => setHoveredSector(null)}
+                      tabIndex={0}
+                      role="button"
+                      aria-label="Select West Stand sector metrics"
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedSector('West Stand'); } }}
                     />
 
                     {/* Interactive Gate Markers */}
@@ -2900,6 +2921,30 @@ function App() {
                     onChange={(e) => setVolTaskLoc(e.target.value)}
                     style={{ flex: '1 1 90px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none' }}
                   />
+                  
+                  {/* Crew Dropdown Selector */}
+                  <select
+                    value={volTaskCrew}
+                    onChange={(e) => setVolTaskCrew(e.target.value)}
+                    style={{ flex: '1 1 120px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none', cursor: 'pointer' }}
+                  >
+                    <option value="Green Volunteers">Green Volunteers</option>
+                    <option value="Accessibility Team">Accessibility Team</option>
+                    <option value="Crowd Management Team">Crowd Management Team</option>
+                    <option value="Staff Crew Alpha">Staff Crew Alpha</option>
+                  </select>
+
+                  {/* Priority Dropdown Selector */}
+                  <select
+                    value={volTaskPriority}
+                    onChange={(e) => setVolTaskPriority(e.target.value)}
+                    style={{ flex: '1 1 80px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none', cursor: 'pointer' }}
+                  >
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                  </select>
+
                   <button
                     onClick={() => {
                       if (!volTaskName || !volTaskLoc) return;
@@ -4282,7 +4327,7 @@ function App() {
                 </div>
               </div>
 
-              <div className="feed-scroll-list">
+              <div className="feed-scroll-list" aria-live="polite" role="log">
                 {insights
                   .filter(ins => intelFeedFilter === 'all' || ins.type === intelFeedFilter)
                   .map((ins) => (
@@ -4354,7 +4399,7 @@ function App() {
               </div>
 
               {/* Chat Feed */}
-              <div className="chat-messages-feed">
+              <div className="chat-messages-feed" aria-live="polite" role="log">
                 {messages.map((msg, index) => (
                   <div key={index} className={`message-bubble ${msg.sender}`}>
                     {msg.sender === 'ai' && (
