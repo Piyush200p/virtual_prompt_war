@@ -846,27 +846,58 @@ function App() {
     }));
   };
 
-  const handleAIVolunteerTask = () => {
+  const handleAIVolunteerTask = async () => {
     let name = "Guide spectators at Gate B";
     let location = "Gate B Entrance";
     let crew = "Staff Crew Alpha";
     let priority = "low";
 
-    if (simulatedSectorData['South Stand'].density.includes('8') || simulatedSectorData['South Stand'].density.includes('9')) {
-      name = "Direct crowd flow from South Stand exit";
-      location = "South Stand Vomitory";
-      crew = "Crowd Management Team";
-      priority = "high";
-    } else if (simulatedSectorData['East Stand'].density.includes('6') || simulatedSectorData['East Stand'].density.includes('7')) {
-      name = "Eco-sorting audit at recycling bins";
-      location = "East Concourse";
-      crew = "Green Volunteers";
-      priority = "medium";
+    if (geminiApiKey) {
+      try {
+        const telemetryPrompt = `Analyze this stadium telemetry and generate ONE volunteer or venue staff task assignment to resolve a bottleneck.
+        Stadium: ${activeStadium.name}
+        Crowd Densities:
+        - North: ${simulatedSectorData['North Stand'].density}
+        - South: ${simulatedSectorData['South Stand'].density}
+        - East: ${simulatedSectorData['East Stand'].density}
+        - West: ${simulatedSectorData['West Stand'].density}
+        Active Gates wait times:
+        ${STADIUM_GATES.map(g => `- ${g.label}: ${g.queueWait} (Status: ${g.status})`).join('\n')}
+        
+        Generate a JSON object with keys: name, location, crew, priority (low, medium, high). Respond with ONLY the JSON object. Do not include markdown code block formatting.`;
+        
+        const response = await callGeminiAPI(telemetryPrompt);
+        let cleaned = response.trim();
+        if (cleaned.startsWith('```')) {
+          cleaned = cleaned.replace(/^```json\s*/, '').replace(/```$/, '').trim();
+        }
+        const parsedTask = JSON.parse(cleaned);
+        if (parsedTask.name && parsedTask.location && parsedTask.crew && parsedTask.priority) {
+          name = parsedTask.name;
+          location = parsedTask.location;
+          crew = parsedTask.crew;
+          priority = parsedTask.priority.toLowerCase();
+        }
+      } catch (err) {
+        console.error("Gemini failed to generate task, falling back to heuristic:", err);
+      }
     } else {
-      name = "Elevator assistant for wheelchair access";
-      location = "Elevator Lobby B";
-      crew = "Accessibility Team";
-      priority = "medium";
+      if (simulatedSectorData['South Stand'].density.includes('8') || simulatedSectorData['South Stand'].density.includes('9')) {
+        name = "Direct crowd flow from South Stand exit";
+        location = "South Stand Vomitory";
+        crew = "Crowd Management Team";
+        priority = "high";
+      } else if (simulatedSectorData['East Stand'].density.includes('6') || simulatedSectorData['East Stand'].density.includes('7')) {
+        name = "Eco-sorting audit at recycling bins";
+        location = "East Concourse";
+        crew = "Green Volunteers";
+        priority = "medium";
+      } else {
+        name = "Elevator assistant for wheelchair access";
+        location = "Elevator Lobby B";
+        crew = "Accessibility Team";
+        priority = "medium";
+      }
     }
 
     handleAddVolunteerTask(name, location, crew, priority);
@@ -1955,6 +1986,29 @@ function App() {
                         </text>
                       </g>
                     ))}
+
+                    {/* Active Incident Warning Pins */}
+                    {incidents.filter(inc => inc.status !== 'Completed' && inc.status !== 'Resolved').map(inc => {
+                      const loc = inc.location.toLowerCase();
+                      let cx = 150;
+                      let cy = 120;
+                      if (loc.includes('gate b') || loc.includes('east turnstiles')) { cx = 310; cy = 130; }
+                      else if (loc.includes('gate a') || loc.includes('north stand')) { cx = 200; cy = 50; }
+                      else if (loc.includes('gate c') || loc.includes('south stand') || loc.includes('section 112')) { cx = 200; cy = 240; }
+                      else if (loc.includes('gate d') || loc.includes('west stand')) { cx = 90; cy = 130; }
+                      else if (loc.includes('concession')) { cx = 270; cy = 180; }
+                      
+                      return (
+                        <g key={`inc-pin-${inc.id}`} onClick={() => setSelectedSector(loc.includes('south') ? 'South Stand' : loc.includes('east') ? 'East Stand' : loc.includes('north') ? 'North Stand' : 'West Stand')} style={{ cursor: 'pointer' }}>
+                          <circle cx={cx} cy={cy} r="8" fill="#ef4444" opacity="0.8">
+                            <animate attributeName="r" values="6;11;6" dur="1.6s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.6s" repeatCount="indefinite" />
+                          </circle>
+                          <circle cx={cx} cy={cy} r="4" fill="#ef4444" stroke="#fff" strokeWidth="1" />
+                          <title>Active Hazard: {inc.category} at {inc.location}</title>
+                        </g>
+                      );
+                    })}
                   </svg>
 
                   {/* Interactive sector tooltip overlay */}
@@ -2634,6 +2688,29 @@ function App() {
                           </g>
                         );
                       })}
+
+                      {/* Active Incident Warning Pins on Fan Map */}
+                      {incidents.filter(inc => inc.status !== 'Completed' && inc.status !== 'Resolved').map(inc => {
+                        const loc = inc.location.toLowerCase();
+                        let cx = 150;
+                        let cy = 120;
+                        if (loc.includes('gate b') || loc.includes('east turnstiles')) { cx = 310; cy = 130; }
+                        else if (loc.includes('gate a') || loc.includes('north stand')) { cx = 200; cy = 50; }
+                        else if (loc.includes('gate c') || loc.includes('south stand') || loc.includes('section 112')) { cx = 200; cy = 240; }
+                        else if (loc.includes('gate d') || loc.includes('west stand')) { cx = 90; cy = 130; }
+                        else if (loc.includes('concession')) { cx = 270; cy = 180; }
+                        
+                        return (
+                          <g key={`fan-inc-pin-${inc.id}`}>
+                            <circle cx={cx} cy={cy} r="6" fill="#ef4444" opacity="0.8">
+                              <animate attributeName="r" values="4;8;4" dur="2s" repeatCount="indefinite" />
+                              <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+                            </circle>
+                            <circle cx={cx} cy={cy} r="3" fill="#ef4444" stroke="#fff" strokeWidth="1" />
+                            <title>Operations Warning: {inc.category}</title>
+                          </g>
+                        );
+                      })}
                     </svg>
                   </div>
 
@@ -3165,6 +3242,21 @@ function App() {
                       {currentWayfinding.map((stepItem, idx) => {
                         const isDone = currentRouteStep > idx;
                         const isActive = currentRouteStep === idx;
+
+                        // Check if there are active incidents in this step's area to trigger dynamic wayfinding warnings
+                        const stepText = (stepItem.title + " " + stepItem.desc).toLowerCase();
+                        const matchingIncidents = incidents.filter(inc => {
+                          if (inc.status === 'Completed' || inc.status === 'Resolved') return false;
+                          const loc = inc.location.toLowerCase();
+                          const keywords = ['section 124', 'gate a', 'gate b', 'gate c', 'gate d', 'concession', 'section 112'];
+                          for (const kw of keywords) {
+                            if (loc.includes(kw) && stepText.includes(kw)) {
+                              return true;
+                            }
+                          }
+                          return false;
+                        });
+
                         return (
                           <div key={idx} className={`nav-route-step ${isDone ? 'done' : isActive ? 'active' : ''}`} style={{ paddingBottom: idx === currentWayfinding.length - 1 ? 0 : '1rem' }}>
                             <div className="nav-step-icon">
@@ -3173,6 +3265,26 @@ function App() {
                             <div className="nav-step-text">
                               <div className="nav-step-title" style={{ fontSize: '0.78rem' }}>{stepItem.title}</div>
                               <div className="nav-step-desc" style={{ fontSize: '0.68rem' }}>{stepItem.desc}</div>
+                              {matchingIncidents.map(inc => (
+                                <div key={inc.id} style={{
+                                  marginTop: '0.4rem',
+                                  padding: '0.35rem 0.5rem',
+                                  background: 'rgba(239, 68, 68, 0.08)',
+                                  borderLeft: '2px solid #ef4444',
+                                  borderRadius: '4px',
+                                  color: '#fca5a5',
+                                  fontSize: '0.62rem',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '0.1rem'
+                                }}>
+                                  <span style={{ fontWeight: 700 }}>⚠️ Active Hazard: {inc.category}</span>
+                                  <span>{inc.description}</span>
+                                  <span style={{ fontSize: '0.58rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                                    Status: {inc.status} ({inc.dispatch ? `Staff: ${inc.dispatch.staff}` : 'Awaiting Crew'})
+                                  </span>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         );
