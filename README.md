@@ -10,11 +10,14 @@ GitHub Repository: **[https://github.com/Piyush200p/virtual_prompt_war](https://
 
 ## 📖 Table of Contents
 1. [Project Vision & Core Objectives](#-project-vision--core-objectives)
-2. [Dual-Portal Architecture](#-dual-portal-architecture)
-3. [Generative AI & Prompt Engineering Strategy](#-generative-ai--prompt-engineering-strategy)
-4. [Aesthetics & Design System](#-aesthetics--design-system)
-5. [Technical Implementation & Tech Stack](#-technical-implementation--tech-stack)
-6. [Getting Started & Local Installation](#-getting-started--local-installation)
+2. [Chosen Vertical & Challenge Alignment](#-chosen-vertical--challenge-alignment)
+3. [Dual-Portal Architecture](#-dual-portal-architecture)
+4. [Generative AI & Prompt Engineering Strategy](#-generative-ai--prompt-engineering-strategy)
+5. [Aesthetics & Design System](#-aesthetics--design-system)
+6. [Technical Implementation & Tech Stack](#-technical-implementation--tech-stack)
+7. [Approach, Logic & How it Works](#-approach-logic--how-it-works)
+8. [Assumptions Made](#-assumptions-made)
+9. [Getting Started & Local Installation](#-getting-started--local-installation)
 
 ---
 
@@ -122,6 +125,27 @@ Make sure you have [Node.js](https://nodejs.org/) installed (v18+ recommended).
    npm run build
    ```
    This compiles static assets into the `/dist` directory, ready to be hosted.
+
+---
+
+## 🎯 Chosen Vertical & Challenge Alignment
+* **Chosen Vertical**: **Smart Stadiums & Tournament Operations** (Google PromptWars Challenge 4: FIFA World Cup 2026).
+* **Challenge Targets**: Unifying high-density safety management, real-time ticket validation checks, green sustainability metrics, wheelchair accessible routes, eco-transportation guides, and multilingual spectator interaction.
+
+---
+
+## 💡 Approach, Logic & How it Works
+* **Dual-View State Synchronization**: The system synchronizes the Operations Console and Fan Portal state in real-time. When an incident dispatcher registers a crowd/facility hazard, it immediately updates the stadium map overlays and triggers warning banners inside the fan's step-by-step wayfinding instructions.
+* **Context-Aware LLM Prompts**: The assistant compiles live stadium parameters (current match, weather, stand densities, gate wait times) and injects them as structured context alongside the selected user language preference into Gemini's system instructions.
+* **Model Selection Metrics**: Evaluates and routes tasks dynamically between simple (Flash) and complex reasoning (Pro) models, demonstrating cost-to-performance optimizations.
+* **Accessibility Rerouting**: The wayfinding router checks the accessibility toggle to swap paths dynamically to alternate coordinates (`accessibilityRoute` in database), bypassing escalators and stairs.
+
+---
+
+## 📋 Assumptions Made
+1. **Dual Connectivity Fallback**: Assumes that if no Gemini API Key is entered, the interface should remain fully functional by falling back to high-fidelity localized simulation strings.
+2. **Standard REST API Reachability**: Assumes standard browser fetch requests can connect directly to Google's generative language API endpoints without strict CORS proxies.
+3. **Schema Compliance**: Assumes custom stadium configurations adhere to a standard JSON schema containing nested attributes for sectors, concessions, and volunteer tasks.
 
 ---
 
