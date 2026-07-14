@@ -1,0 +1,89 @@
+/* FIFA live match ticker */
+
+/* FIFA Live Match Ticker */
+.fifa-ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: rgba(10, 13, 20, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.45rem 1rem;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  z-index: 99;
+}
+
+.fifa-ticker-label {
+  font-family: var(--heading);
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  background: rgba(224, 159, 62, 0.1);
+  border: 1px solid rgba(224, 159, 62, 0.25);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-right: 1.5rem;
+  white-space: nowrap;
+}
+
+.fifa-ticker-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  display: flex;
+}
+
+.fifa-ticker-content {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee-scroll 35s linear infinite;
+  gap: 2.5rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.fifa-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.fifa-ticker-item .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  box-shadow: 0 0 8px var(--color-danger);
+  animation: beacon 1.2s infinite;
+}
+
+.fifa-ticker-item .ft-badge {
+  font-size: 0.6rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  padding: 0.05rem 0.25rem;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Hover to pause ticker */
+.fifa-ticker-wrap:hover .fifa-ticker-content {
+  animation-play-state: paused;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STADIUM FAN EXPERIENCE PORTAL - HIGH-FIDELITY HOME SCREEN
+   ═══════════════════════════════════════════════════════ */
+

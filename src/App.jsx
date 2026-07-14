@@ -1,31 +1,26 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
-  MessageSquare, 
-  User, 
-  Ticket, 
-  MapPin, 
-  Clock, 
-  Compass, 
-  Coffee, 
-  Send, 
-  Activity, 
-  CloudRain, 
-  TrendingUp, 
-  Plus, 
-  Check, 
-  Zap, 
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  Shield,
+  AlertTriangle,
+  MessageSquare,
+  User,
+  Ticket,
+  Clock,
+  Compass,
+  Coffee,
+  Send,
+  Activity,
+  CloudRain,
+  TrendingUp,
+  Plus,
+  Check,
+  Zap,
   Key,
   Flame,
   Utensils,
   Navigation,
   Eye,
   Play,
-  Pause,
-  Users,
-  LogOut,
   Cpu,
   Accessibility,
   Globe,
@@ -33,464 +28,18 @@ import {
   ClipboardList,
   Home
 } from 'lucide-react';
+
 import { STADIUM_CONFIGS } from './data/stadiums';
-
-// FIFA World Cup 2026 Brand Collaborations & Corporate Sponsors Dataset
-const SPONSORS = [
-  {
-    name: "Adidas",
-    tier: "partner",
-    tierLabel: "FIFA Partner",
-    desc: "Official sportswear and match ball partner. Visit the Megastore at North Plaza for official gear.",
-    benefit: "Match Balls & Apparel"
-  },
-  {
-    name: "Lenovo",
-    tier: "partner",
-    tierLabel: "FIFA Partner",
-    desc: "Official Technology Partner. Lenovo integrates AI models and edge computing into the wayfinding and crowd telemetry operations.",
-    benefit: "AI Ops & Computing"
-  },
-  {
-    name: "Coca-Cola",
-    tier: "partner",
-    tierLabel: "FIFA Partner",
-    desc: "Official Beverage Partner. Coke refresh stations are located at all concession exits. Grab a cold Coke today.",
-    benefit: "Official Beverage"
-  },
-  {
-    name: "Hyundai-Kia",
-    tier: "partner",
-    tierLabel: "FIFA Partner",
-    desc: "Official Mobility and Automotive Partner. Access dedicated EV shuttles at Gate 4B for easy transport.",
-    benefit: "EV Shuttles & Transit"
-  },
-  {
-    name: "Visa",
-    tier: "partner",
-    tierLabel: "FIFA Partner",
-    desc: "Official Payment Technology Partner. Tap to pay at any concession stand. 10% off when paying with Visa.",
-    benefit: "10% Concessions Off"
-  },
-  {
-    name: "Qatar Airways",
-    tier: "partner",
-    tierLabel: "FIFA Partner",
-    desc: "Official Global Airline. Travel globally with premium flight services for visiting fan groups.",
-    benefit: "Global Travel Partner"
-  },
-  {
-    name: "Aramco",
-    tier: "partner",
-    tierLabel: "FIFA Partner",
-    desc: "Official Energy Partner. Powering the sustainable smart-grid charging pods across the venue.",
-    benefit: "Renewable Power Pods"
-  },
-  {
-    name: "AB InBev",
-    tier: "sponsor",
-    tierLabel: "World Cup Sponsor",
-    desc: "Official Beverage Sponsor. Budweiser and Michelob Ultra zero-alcohol lounges located at the East Stand.",
-    benefit: "Michelob Fan Lounges"
-  },
-  {
-    name: "Unilever",
-    tier: "sponsor",
-    tierLabel: "World Cup Sponsor",
-    desc: "Official Personal Care Partner. Axe and Dove Men+Care styling stations set up in rest areas.",
-    benefit: "Personal Care Zones"
-  },
-  {
-    name: "Bank of America",
-    tier: "sponsor",
-    tierLabel: "World Cup Sponsor",
-    desc: "Official Banking Sponsor. Linked directly to your Digital ID Pass for simple, secure deposits.",
-    benefit: "In-App Secure Wallet"
-  },
-  {
-    name: "Lay's",
-    tier: "sponsor",
-    tierLabel: "World Cup Sponsor",
-    desc: "Official snack food partner. Grab a packet of Lay's at Concessions Stall #3.",
-    benefit: "Official Snacking"
-  },
-  {
-    name: "McDonald's",
-    tier: "sponsor",
-    tierLabel: "World Cup Sponsor",
-    desc: "Official Quick-Service Restaurant. Place a pre-order now for instant pickup at Concession Stall #1.",
-    benefit: "Pre-order Quick Bites"
-  },
-  {
-    name: "Hisense",
-    tier: "sponsor",
-    tierLabel: "World Cup Sponsor",
-    desc: "Official Consumer Electronics Sponsor. Advanced display technologies power the stadium big screens.",
-    benefit: "HD Broadcast Displays"
-  },
-  {
-    name: "Verizon",
-    tier: "sponsor",
-    tierLabel: "World Cup Sponsor",
-    desc: "Official Telecommunications Partner. Ultra Wideband 5G powers the Live AR Player Tracking overlays.",
-    benefit: "5G AR Stats Overlay"
-  },
-  {
-    name: "Airbnb",
-    tier: "supporter",
-    tierLabel: "Local Supporter",
-    desc: "Alternative accommodation platform. Book local homes close to the stadium for a local experience.",
-    benefit: "Alternative Lodging"
-  },
-  {
-    name: "American Airlines",
-    tier: "supporter",
-    tierLabel: "Local Supporter",
-    desc: "North American Airline Supporter. Handling local domestic transfers and logistics for match-day arrivals.",
-    benefit: "Domestic Airline"
-  },
-  {
-    name: "DoorDash",
-    tier: "supporter",
-    tierLabel: "Local Supporter",
-    desc: "On-demand delivery sponsor. Look out for the DoorDash drop-zones for VIP seat-side food dropoffs.",
-    benefit: "In-Seat Food Delivery"
-  },
-  {
-    name: "Globant",
-    tier: "supporter",
-    tierLabel: "Local Supporter",
-    desc: "IT and digital services supporter. Globant manages the mobile application systems and stadium interfaces.",
-    benefit: "Mobile Apps Developer"
-  },
-  {
-    name: "Diageo",
-    tier: "supporter",
-    tierLabel: "Local Supporter",
-    desc: "Official spirits supporter across the Americas. Visit the hospitality suite for curated mixology.",
-    benefit: "Hospitality Lounges"
-  }
-];
-
-// Format Match Teams to Initials with hover full-names
-const formatMatchInitials = (matchStr) => {
-  if (!matchStr) return "";
-  
-  const teamMapping = {
-    'Argentina': 'ARG',
-    'France': 'FRA',
-    'India': 'IND',
-    'Australia': 'AUS',
-    'Chelsea': 'CHE',
-    'Arsenal': 'ARS',
-    'Spain': 'ESP',
-    'England': 'ENG',
-    'Portugal': 'POR',
-    'Croatia': 'CRO'
-  };
-
-  const vsRegex = /\s+vs\.?\s+/i;
-  if (vsRegex.test(matchStr)) {
-    const parts = matchStr.split(vsRegex);
-    let team1 = parts[0].trim();
-    let team2 = parts[1].trim();
-    
-    let stage = "";
-    const bracketIndex = team2.indexOf('(');
-    if (bracketIndex !== -1) {
-      stage = team2.substring(bracketIndex).trim();
-      team2 = team2.substring(0, bracketIndex).trim();
-    }
-    
-    if (stage.toLowerCase().includes('quarter-final')) {
-      stage = stage.replace(/quarter-final\s*(\d+)/i, 'QF$1').replace(/quarter-final/i, 'QF');
-    } else if (stage.toLowerCase().includes('semi-final')) {
-      stage = stage.replace(/semi-final\s*(\d+)/i, 'SF$1').replace(/semi-final/i, 'SF');
-    } else if (stage.toLowerCase().includes('final')) {
-      stage = stage.replace(/final/i, 'F');
-    }
-
-    const getInitials = (name) => {
-      if (teamMapping[name]) return teamMapping[name];
-      if (name.length <= 3) return name.toUpperCase();
-      return name.substring(0, 3).toUpperCase();
-    };
-
-    const init1 = getInitials(team1);
-    const init2 = getInitials(team2);
-    
-    return `${init1} vs ${init2} ${stage}`;
-  }
-  
-  return matchStr;
-};
-
-const renderDispatcherSparkline = (data, color) => {
-  const width = 60;
-  const height = 18;
-  const padding = 2;
-  const max = Math.max(...data) || 1;
-  const min = Math.min(...data) || 0;
-  
-  const points = data.map((val, idx) => {
-    const x = padding + (idx / (data.length - 1)) * (width - padding * 2);
-    const y = height - padding - ((val - min) / (max - min)) * (height - padding * 2);
-    return `${x},${y}`;
-  }).join(' ');
-
-  return (
-    <svg width={width} height={height} style={{ overflow: 'visible', filter: `drop-shadow(0 0 3px ${color}80)` }}>
-      <polyline
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points={points}
-      />
-      <circle
-        cx={padding + (data.length - 1) * (width - padding * 2) / (data.length - 1)}
-        cy={height - padding - ((data[data.length - 1] - min) / (max - min)) * (height - padding * 2)}
-        r="2"
-        fill={color}
-      />
-    </svg>
-  );
-};
-
-// Dynamic Stadium Outline and Playing Field visual elements based on sport & venue
-const renderStadiumMapElements = (stadiumId, isFanView = false) => {
-  const pitchColor = isFanView ? "rgba(10, 61, 46, 0.85)" : "rgba(4, 120, 87, 0.85)";
-  const strokeColor = isFanView ? "rgba(255, 255, 255, 0.2)" : "rgba(255, 255, 255, 0.4)";
-  const strokeWidth = isFanView ? 1.5 : 2;
-
-  switch (stadiumId) {
-    case 'wembley':
-      // Soccer field with the iconic sweeping Wembley Arch!
-      return (
-        <g id="wembley-stadium-layout">
-          {/* Outer Stadium Rim: Oval */}
-          <path d="M200 15 C320 15, 385 65, 385 150 C385 235, 320 285, 200 285 C80 285, 15 235, 15 150 C15 65, 80 15, 200 15 Z" 
-            fill={isFanView ? "rgba(11, 15, 25, 0.75)" : "rgba(22, 29, 48, 0.55)"} 
-            stroke={isFanView ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)"} 
-            strokeWidth="4" 
-          />
-          
-          {/* Soccer Pitch */}
-          <rect x="140" y="110" width="120" height="80" rx="4" fill={pitchColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <line x1="200" y1="110" x2="200" y2="190" stroke={strokeColor} strokeWidth={strokeWidth} />
-          <circle cx="200" cy="150" r="20" stroke={strokeColor} strokeWidth={strokeWidth} fill="none" />
-          
-          {/* Iconic Wembley Arch (Sweeping Neon blue-glow curve across the top) */}
-          <path d="M40 150 A 175 140 0 0 1 360 150" fill="none" stroke="rgba(59, 130, 246, 0.15)" strokeWidth="6" strokeLinecap="round" />
-          <path d="M40 150 A 175 140 0 0 1 360 150" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeDasharray="3 4">
-            <animate attributeName="stroke-dashoffset" values="0;20" dur="2s" repeatCount="indefinite" />
-          </path>
-        </g>
-      );
-    case 'metlife':
-    default:
-      // Standard MetLife Oval Soccer Field
-      return (
-        <g id="metlife-stadium-layout">
-          {/* Outer Stadium Rim */}
-          <path d="M200 15 C320 15, 385 65, 385 150 C385 235, 320 285, 200 285 C80 285, 15 235, 15 150 C15 65, 80 15, 200 15 Z" 
-            fill={isFanView ? "rgba(11, 15, 25, 0.75)" : "rgba(22, 29, 48, 0.55)"} 
-            stroke={isFanView ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)"} 
-            strokeWidth="4" 
-          />
-          
-          {/* Soccer Pitch */}
-          <rect x="140" y="110" width="120" height="80" rx="4" fill={pitchColor} stroke={strokeColor} strokeWidth={strokeWidth} />
-          <line x1="200" y1="110" x2="200" y2="190" stroke={strokeColor} strokeWidth={strokeWidth} />
-          <circle cx="200" cy="150" r="20" stroke={strokeColor} strokeWidth={strokeWidth} fill="none" />
-        </g>
-      );
-  }
-};
-
-const MODEL_SPECS = {
-  gemini_flash: {
-    name: "Gemini Flash",
-    latency: "0.18s",
-    cost: "$0.075 / M tokens",
-    accuracy: "90.2%",
-    reasoning: "Sub-second lightweight execution",
-    recommendation: "Recommended for simple chat interactions, quick multi-language translation, and basic local concession lookups."
-  },
-  flash_3_5_low: {
-    name: "Gemini 3.5 Flash (Low)",
-    latency: "0.20s",
-    cost: "$0.10 / M tokens",
-    accuracy: "92.1%",
-    reasoning: "Cost-optimized fast routing",
-    recommendation: "Optimized for high-speed ticket scanning verifications and low-priority crowd sensor checks."
-  },
-  flash_3_5_medium: {
-    name: "Gemini 3.5 Flash (Medium)",
-    latency: "0.25s",
-    cost: "$0.15 / M tokens",
-    accuracy: "94.3%",
-    reasoning: "Balanced speed and accuracy",
-    recommendation: "Highly recommended for active volunteer inquiries, navigation path queries, and stadium info-desk guidelines."
-  },
-  flash_3_5_high: {
-    name: "Gemini 3.5 Flash (High)",
-    latency: "0.35s",
-    cost: "$0.25 / M tokens",
-    accuracy: "95.8%",
-    reasoning: "High precision speed routing",
-    recommendation: "Ideal for real-time crowd heatmaps, volunteer green duty dispatching, and minor safety warning announcements."
-  },
-  sonnet_4_6_thinking: {
-    name: "Claude 4.6 Sonnet (Thinking)",
-    latency: "2.10s",
-    cost: "$3.00 / M tokens",
-    accuracy: "98.7%",
-    reasoning: "Deep reasoning & SOP alignment",
-    recommendation: "Critical for Operations command hazard control, multi-agency dispatches, and step-free wheelchair routing logic."
-  },
-  opus_4_6: {
-    name: "Claude 4.6 Opus",
-    latency: "4.50s",
-    cost: "$15.00 / M tokens",
-    accuracy: "99.4%",
-    reasoning: "Extreme complex task synthesis",
-    recommendation: "Best for high-stakes emergency routing under stadium-wide power grid failure or complex crowd evacuation protocols."
-  }
-};
-
-const sampleStadiumJSON = `{
-  "id": "lusail",
-  "name": "Lusail Iconic Stadium",
-  "location": "Lusail, Doha",
-  "country": "Qatar",
-  "region": "Middle East",
-  "role": "Semi-Final Venue",
-  "capacity": "88,966",
-  "currentMatch": "Argentina vs France (World Cup Final)",
-  "currentScan": "96.4% (85,800 Fans)",
-  "weather": "25°C (Breezy)",
-  "sustainabilityScore": 92,
-  "svgRoute": [
-    { "x": 50, "y": 250, "label": "West Gate Check", "step": 0 },
-    { "x": 180, "y": 200, "label": "VIP Lobby", "step": 1 },
-    { "x": 200, "y": 140, "label": "Section 104", "step": 2 }
-  ],
-  "accessibilityRoute": [
-    { "x": 50, "y": 250, "label": "West Gate ADA", "step": 0 },
-    { "x": 120, "y": 220, "label": "Elevator Hall 1", "step": 1 },
-    { "x": 200, "y": 140, "label": "Section 104 ADA", "step": 2 }
-  ],
-  "ticket": {
-    "holder": "Alex Morgan",
-    "seat": "Sec 104, Row 5, Seat 14",
-    "gate": "Gate A (West Gate)",
-    "barcode": "FIFA-2022-LUSAIL-10029"
-  },
-  "sectors": [
-    { "name": "North Stand", "density": "89%", "status": "Heavy Flow", "security": "Level 2", "temp": "25°C", "colorClass": "sector-high" },
-    { "name": "East Stand", "density": "94%", "status": "Severe Congestion", "security": "Level 3", "temp": "26°C", "colorClass": "sector-high" },
-    { "name": "South Stand", "density": "52%", "status": "Moderate Flow", "security": "Level 2", "temp": "24°C", "colorClass": "sector-medium" },
-    { "name": "West Stand", "density": "31%", "status": "Normal Flow", "security": "Level 1", "temp": "24°C", "colorClass": "sector-low" }
-  ],
-  "concessions": [
-    { "id": 1, "name": "Shawarma Wrap Special", "price": "$9.50", "wait": "8 mins", "calories": "410 kcal", "sustainability": ["Local-Source"] },
-    { "id": 2, "name": "Hummus & Pita Plate", "price": "$6.00", "wait": "3 mins", "calories": "280 kcal", "sustainability": ["Plant-Based", "Zero-Waste"] },
-    { "id": 3, "name": "Karak Cardamom Tea", "price": "$4.50", "wait": "2 mins", "calories": "90 kcal", "sustainability": ["Zero-Plastic"] }
-  ],
-  "wayfinding": [
-    { "step": 0, "title": "Gate A West Gate", "desc": "NFC Card scan successfully completed at main entry." },
-    { "step": 1, "title": "Golden Ring VIP Promenade", "desc": "Proceed past security checkpoint towards section 104 escalators." },
-    { "step": 2, "title": "Section 104 VIP Tier", "desc": "Walk straight ahead. Row 5 seats are situated directly behind player dugouts." }
-  ],
-  "accessibilityWayfinding": [
-    { "step": 0, "title": "Gate A ADA Entry", "desc": "Access via zero-step wheelchair ramp." },
-    { "step": 1, "title": "VIP West Elevator", "desc": "Take Elevator 4 to Level 1 VIP Suite corridor." },
-    { "step": 2, "title": "Section 104 ADA Box", "desc": "Wheelchair-accessible seating is located directly ahead." }
-  ],
-  "transportation": [
-    { "type": "Metro Red Line", "wait": "5 mins", "eco": "Low Carbon 🌱" },
-    { "type": "Park & Ride Shuttle", "wait": "8 mins", "eco": "Low Carbon 🌱" },
-    { "type": "Lounge Rideshare", "wait": "15 mins", "eco": "High Carbon 🚗" }
-  ],
-  "volunteerTasks": [
-    { "id": 1, "task": "Direct fans from West Gate ADA to elevators", "status": "Pending", "sector": "West Stand", "priority": "High" },
-    { "id": 2, "task": "Monitor Hummus Stand #2 compost bin sorting", "status": "Completed", "sector": "East Stand", "priority": "Medium" }
-  ]
-}`;
-
-const HELPDESK_REGISTRY = {
-  metlife: {
-    country: "United States",
-    flag: "🇺🇸",
-    emergency: "911",
-    smsContact: "Text 'MLF' to 78247",
-    bagPolicy: "Clear bag policy strictly enforced. Max size: 12\" x 6\" x 12\" clear plastic/PVC bag, or small clutch bag (4.5\" x 6.5\").",
-    payment: "100% Cashless venue. Only major credit/debit cards and mobile payments (Apple Pay, Google Pay) are accepted.",
-    transport: "NJ Transit Rail Meadowlands Station directly outside. Rideshare pickup/dropoff located in Lot G.",
-    prohibited: "Professional cameras, laptops, non-clear bags, selfie sticks, laser pointers, outside food/beverages."
-  },
-  wembley: {
-    country: "United Kingdom",
-    flag: "🇬🇧",
-    emergency: "999",
-    smsContact: "Text 'HELP' to 66566",
-    bagPolicy: "A4 Bag Policy. Maximum bag size: 21cm x 30cm x 8cm. All bags are subject to search at the security arches.",
-    payment: "100% Cashless. Card payment only (contactless preferred). Cash is not accepted anywhere inside the concourses.",
-    transport: "London Underground: Wembley Park (Jubilee/Metropolitan) and Wembley Central (Bakerloo). Chiltern Railways to Wembley Stadium Station.",
-    prohibited: "Umbrellas, glass bottles, cans, alcohol, professional cameras, recording devices, flags larger than 2m x 1m."
-  },
-  lusail: {
-    country: "Qatar",
-    flag: "🇶🇦",
-    emergency: "999",
-    smsContact: "Call Operations Command: +974 4444-9999",
-    bagPolicy: "Small bags subject to X-ray scanning at security points. Maximum size 30cm x 30cm x 15cm.",
-    payment: "Cashless venue. Contactless credit/debit cards and mobile payments (Visa/Google Pay) are highly recommended.",
-    transport: "Lusail Metro Station (Red Line) directly connected to the stadium park. Free Park & Ride shuttle buses from Lot A.",
-    prohibited: "Selfie sticks, powerbanks, recording equipment, aerosols, horns, outside food/liquids."
-  }
-};
-
-const translations = {
-  en: {
-    route: `📍 **Direct Route to Section 124 (East Stand):**\n\n1. From your entrance at **Gate B**, move past the security screening checkpoint.\n2. Take the **East Escalator Escalade** up to Level 1 Concourse.\n3. Turn right and walk past the concessions area (near Concession Stand 8).\n4. Section 124 entrance will be on your left. Seek usher **Marcus** if you need wheelchair assistance.\n\n*Live Traffic Status: Security lines at Gate B are running efficiently (under 4 minutes wait time).*`,
-    food: `🍔 **Concession Stand Real-time Wait Guide:**\n\n*   **Giant Bavarian Pretzel** (Stall #2): Wait time **4 mins** (Nearest to Section 124, 50m north).\n*   **Neon FIFA Soda** (Stall #3): Wait time **2 mins** (Next to Section 124 entrance).\n*   **Stadium Angus Burger** (Stall #1): Wait time **15 mins** (High congestion due to halftime rush).\n\n💡 *Tip: Order right now to collect your Giant Bavarian Pretzel with minimal wait!*`,
-    medical: `⚠️ **Emergency Dispatch Logged:**\n\nI have successfully initiated an operational dispatch alert for the reported hazard.\n\n**Operations Room Dispatch Action:**\n- **Target Location:** South Stand Area / South Gate C\n- **Crew Dispatched:** Immediate Safety Response Squad\n- **Action:** Hazard containment and debris clearing.\n\nThank you for keeping MetLife Stadium safe!`,
-    default: `📋 **Arena Info Desk:**\n\nI can help you with stadium operations for **Argentina vs France** at MetLife Stadium:\n- **Ticket & Seating:** Your seat is at **Section 124, Row 12, Seat 4**.\n- **Baggage Policy:** Bags larger than 12x6x12 inches are not permitted. A bag deposit terminal is available outside Gate A.\n- **Operations Status:** Stadium is at **67% seating capacity**; Gate B is currently the fastest entry point.`
-  },
-  es: {
-    route: `📍 **Ruta Directa a la Sección 124 (Tribuna Este):**\n\n1. Desde su entrada en la **Puerta B**, pase el punto de control de seguridad.\n2. Suba por la **Escalera Mecánica Este** hasta el Vestíbulo del Nivel 1.\n3. Gire a la derecha y pase el área de concesiones.\n4. La entrada a la Sección 124 estará a su izquierda. Busque al asistente **Marcus** si necesita asistencia.\n\n*Tráfico en Vivo: Espera en Puerta B de menos de 4 minutos.*`,
-    food: `🍔 **Espera en Concesiones en Tiempo Real:**\n\n*   **Pretzel Bávaro Gigante** (Puesto #2): Espera **4 mins**.\n*   **Refresco Souvenir** (Puesto #3): Espera **2 mins**.\n*   **Hamburguesa Angus** (Puesto #1): Espera **15 mins**.\n\n💡 *Consejo: ¡Ordene ahora mismo para evitar filas!*`,
-    medical: `⚠️ **Reporte de Emergencia Registrado:**\n\nHe enviado un equipo para atender el reporte.\n\n**Detalles del Despacho:**\n- **Ubicación:** Área de Tribuna Sur / Entrada Sur C\n- **Equipo:** Escuadrón de Respuesta Rápida\n- **Acción:** Control de riesgos y limpieza.\n\n¡Gracias por mantener MetLife seguro!`,
-    default: `📋 **Mesa de Información del Estadio:**\n\nHola, puedo ayudarte con el partido **Argentina vs France** en MetLife Stadium:\n- **Asiento:** Sección 124, Fila 12, Asiento 4.\n- **Equipaje:** Bolsos de máximo 12x6x12 pulgadas. Depósito disponible en Puerta A.\n- **Capacidad:** Estadio al 67%. La Puerta B es la más fluida.`
-  },
-  fr: {
-    route: `📍 **Itinéraire direct vers la section 124 (Tribune Est) :**\n\n1. Depuis votre entrée à la **Porte B**, passez le contrôle de sécurité.\n2. Empruntez **l'escalier mécanique Est** vers le hall du niveau 1.\n3. Tournez à droite et passez devant les concessions.\n4. L'entrée de la section 124 sera sur votre gauche.\n\n*Trafic en temps réel : Temps d'attente à la Porte B inférieur à 4 minutes.*`,
-    food: `🍔 **Attente aux concessions en temps réel :**\n\n*   **Bretzel géant** (Stall #2) : Attente **4 min**.\n*   **Soda souvenir** (Stall #3) : Attente **2 min**.\n*   **Burger Angus** (Stall #1) : Attente **15 min**.\n\n💡 *Astuce : Commandez maintenant pour récupérer votre Bretzel rapidement !*`,
-    medical: `⚠️ **Signalement d'urgence enregistré :**\n\nUne alerte opérationnelle a été envoyée pour le problème signalé.\n\n**Action de la salle de contrôle :**\n- **Lieu :** Tribune Sud / Porte Sud C\n- **Équipe :** Brigade de sécurité et d'intervention\n- **Action :** Sécurisation et nettoyage.\n\nMerci de veiller sur la sécurité de MetLife !`,
-    default: `📋 **Bureau d'information :**\n\nJe suis à votre disposition pour le match **Argentina vs France** au MetLife Stadium :\n- **Siège :** Section 124, Rangée 12, Siège 4.\n- **Sacs :** Dimensions max 12x6x12 pouces. Dépôt de bagages disponible Porte A.\n- **Statut :** Stade rempli à 67%. La Porte B est la plus rapide.`
-  },
-  pt: {
-    route: `📍 **Rota Direta para a Seção 124 (Arquibancada Leste):**\n\n1. Do Portão B, passe pela triagem de segurança.\n2. Suba a **Escada Rolante Leste** para o Nível 1.\n3. Vire à direita e passe pela área de alimentação.\n4. A Seção 124 estará à esquerda. Solicite assistência caso necessário.\n\n*Tráfego em tempo real: Portão B com espera menor que 4 minutos.*`,
-    food: `🍔 **Tempo de espera de alimentação em tempo real:**\n\n*   **Pretzel Gigante** (Barraca #2): Espera **4 min**.\n*   **Refrigerante Souvenir** (Barraca #3): Espera **2 min**.\n*   **Hambúrguer Angus** (Barraca #1): Espera **15 min**.\n\n💡 *Dica: Faça seu pedido online agora mesmo!*`,
-    medical: `⚠️ **Emergência Registrada:**\n\nUm chamado foi despachado para resolver a situação.\n\n**Detalhes do Chamado:**\n- **Local:** Área da Arquibancada Sul / Portão Sul C\n- **Equipe:** Resposta Rápida de Segurança\n- **Ação:** Isolamento de área e limpeza.\n\nObrigado por colaborar com a segurança!`,
-    default: `📋 **Balcão de Informações:**\n\nPosso ajudar com informações para **Argentina vs France** no MetLife Stadium:\n- **Assento:** Seção 124, Fileira 12, Asiento 4.\n- **Políticas:** Bolsas de até 12x6x12 polegadas. Depósitos disponíveis no Portão A.\n- **Fluxo:** Estádio com 67% de capacidade. Portão B é o mais rápido.`
-  },
-  ar: {
-    route: `📍 **المسار المباشر إلى القسم 124 (المدرج الشرقي):**\n\n1. من بوابة دخولك عند **البوابة B**، تجاوز نقطة التفتيش الأمنية.\n2. اصعد **المصعد الكهربائي الشرقي** إلى بهو المستوى 1.\n3. اتجه يمينًا وتجاوز منطقة المطاعم.\n4. سيكون مدخل القسم 124 على يسارك.\n\n*حالة حركة المرور: خطوط البوابة B سريعة (أقل من 4 دقائق).*`,
-    food: `🍔 **دليل أوقات الانتظار للمطاعم:**\n\n*   **بريتزل بافاري عملاق** (الكشك #2): وقت الانتظار **4 دقائق**.\n*   **صودا تذكارية** (الكشك #3): وقت الانتظار **دقيقتان**.\n*   **برجر أنجوس** (الكشك #1): وقت الانتظار **15 دقيقة**.\n\n💡 *نصيحة: اطلب الآن للاستلام فوراً!*`,
-    medical: `⚠️ **تم تسجيل بلاغ الطوارئ:**\n\nتم إرسال فريق الاستجابة لإنهاء المشكلة.\n\n**إجراءات غرفة العمليات:**\n- **الموقع:** المدرج الجنوبي / البوابة الجنوبية C\n- **الفريق:** فرقة الاستجابة الأمنية السريعة\n- **الإجراء:** تأمين الموقع وإزالة المخاطر.\n\nنشكرك على مساهمتك في سلامة الملعب!`,
-    default: `📋 **مكتب الاستعلامات:**\n\nيمكنني مساعدتك في عمليات مباراة **الأرجنتين ضد فرنسا** في ملعب MetLife:\n- **المقعد:** القسم 124، الصف 12، المقعد 4.\n- **الحقائب:** يُسمح بالحقائب الشفافة مقاس 12x6x12 بوصة. تتوفر خزائن عند البوابة A.\n- **حالة الملعب:** سعة الحضور 67%، البوابة B هي الأسرع للدخول.`
-  },
-  hi: {
-    route: `📍 **सेक्शन 124 (ईस्ट स्टैंड) के लिए सीधा मार्ग:**\n\n1. **गेट B** से प्रवेश करने के बाद सुरक्षा जाँच पार करें।\n2. **ईस्ट एस्केलेटर** से लेवल 1 कॉनकोर्स पर जाएँ।\n3. दाईं ओर मुड़ें और रियायती स्टाल क्षेत्र से आगे निकलें।\n4. सेक्शन 124 का प्रवेश द्वार आपकी बाईं ओर होगा।\n\n*सुरक्षा प्रतीक्षा समय: गेट B पर 4 मिनट से कम प्रतीक्षा।*`,
-    food: `🍔 **रियायत स्टाल प्रतीक्षा समय:**\n\n*   **जायंट बवेरियन प्रेट्ज़ेल** (स्टाल #2): प्रतीक्षा **4 मिनट**।\n*   **स्मृति चिन्ह सोडा** (स्टाल #3): प्रतीक्षा **2 मिनट**।\n*   **एंगस बर्गर** (स्टाल #1): प्रतीक्षा **15 मिनट**।\n\n💡 *सुझाव: लंबी कतारों से बचने के लिए अभी ऑर्डर करें!*`,
-    medical: `⚠️ **आपातकालीन रिपोर्ट दर्ज की गई:**\n\nसुरक्षा टीम को तुरंत रवाना कर दिया गया है।\n\n**संचालन कक्ष कार्रवाई:**\n- **स्थान:** साउथ स्टैंड एरिया / साउथ गेट C\n- **टीम:** क्विक सिक्योरिटी रिस्पांस स्क्वाड\n- **कार्रवाई:** खतरे को कम करना और मलबे की सफाई।\n\nस्टेडियम को सुरक्षित रखने के लिए धन्यवाद!`,
-    default: `📋 **स्टेडियम सूचना डेस्क:**\n\nमैं MetLife स्टेडियम में **Argentina vs France** मैच के बारे में सहायता कर सकता हूँ:\n- **सीट:** सेक्शन 124, रो 12, सीट 4.\n- **बैग नीति:** अधिकतम आकार 12x6x12 इंच। गेट A के पास जमा टर्मिनल उपलब्ध है।\n- **स्थिति:** स्टेडियम 67% भरा है। गेट B प्रवेश के लिए सबसे तेज़ है।`
-  }
-};
+import { SPONSORS } from './data/sponsors';
+import { MODEL_SPECS } from './data/modelSpecs';
+import { sampleStadiumJSON } from './data/sampleStadium';
+import { HELPDESK_REGISTRY } from './data/helpdeskRegistry';
+import { translations } from './data/translations';
+import { STADIUM_GATES } from './data/stadiumGates';
+import { SIM_PHASES, SIM_SECONDARY_METRICS } from './data/simulationPhases';
+import { formatMatchInitials } from './utils/formatMatchInitials';
+import { renderDispatcherSparkline } from './utils/sparkline';
+import { renderStadiumMapElements } from './utils/stadiumMapElements';
 
 function App() {
   const [activeTab, setActiveTab] = useState('operations');
@@ -521,6 +70,151 @@ function App() {
   const [arPassMap, setArPassMap] = useState(false);
   const [arTacticalGrid, setArTacticalGrid] = useState(false);
 
+  // Game Simulation Engine States (Moved up to prevent temporal dead zone ReferenceErrors)
+  const [simPhase, setSimPhase] = useState(null);       // active phase key or null
+  const [simTick, setSimTick] = useState(0);            // drives micro-fluctuations
+  const simIntervalRef = useRef(null);
+
+  // Memoized derived properties for performance and reactivity optimization
+  const sectorData = useMemo(() => {
+    const data = {};
+    if (activeStadium && activeStadium.sectors) {
+      activeStadium.sectors.forEach(s => {
+        data[s.name] = s;
+      });
+    }
+    return data;
+  }, [activeStadium]);
+
+  const helpData = useMemo(() => {
+    if (!activeStadium) return {};
+    return HELPDESK_REGISTRY[activeStadium.id] || {
+      country: activeStadium.country || "International",
+      flag: "🌐",
+      emergency: "112 / Local Police",
+      smsContact: "Contact Stadium Staff",
+      bagPolicy: "Standard stadium bag policy: clear bags or small purses subject to search.",
+      payment: "Contactless cards and major mobile wallets accepted.",
+      transport: "Check local transit schedules. Shuttle services available from main parking lots.",
+      prohibited: "Dangerous items, weapons, large bags, professional recording devices."
+    };
+  }, [activeStadium]);
+
+  const filteredSponsors = useMemo(() => {
+    return SPONSORS.filter(s => sponsorTierFilter === 'all' || s.tier === sponsorTierFilter);
+  }, [sponsorTierFilter]);
+
+  const concessionsList = useMemo(() => {
+    if (!activeStadium || !activeStadium.concessions) return [];
+    return activeStadium.concessions.filter(item => {
+      if (selectedConcessionCategory === 'All') return true;
+      if (selectedConcessionCategory === 'Plant-Based') {
+        return item.sustainability && item.sustainability.includes('Plant-Based');
+      }
+      if (selectedConcessionCategory === 'Zero-Waste') {
+        return item.sustainability && (item.sustainability.includes('Zero-Plastic') || item.sustainability.includes('Zero-Waste'));
+      }
+      return true;
+    });
+  }, [activeStadium, selectedConcessionCategory]);
+
+  const simProgress = useMemo(() => {
+    const keys = Object.keys(SIM_PHASES);
+    const activeIndex = simPhase ? keys.indexOf(simPhase) : -1;
+    const progressPercent = activeIndex >= 0 ? (activeIndex / (keys.length - 1)) * 100 : 0;
+    const activeColor = simPhase ? SIM_PHASES[simPhase].color : 'var(--color-primary)';
+    return { progressPercent, activeColor };
+  }, [simPhase]);
+
+  const currentRoutePoints = useMemo(() => {
+    if (!activeStadium) return [];
+    return (accessibilityMode && activeStadium.accessibilityRoute) ? activeStadium.accessibilityRoute : activeStadium.svgRoute;
+  }, [accessibilityMode, activeStadium]);
+
+  const ticketInfo = useMemo(() => {
+    return activeStadium ? activeStadium.ticket : {};
+  }, [activeStadium]);
+
+  const ticketSeatDetails = useMemo(() => {
+    if (!ticketInfo || !ticketInfo.seat) return { sec: '', row: '', seat: '' };
+    const seatParts = ticketInfo.seat.split(', ');
+    const seatSec = seatParts[0] || '';
+    const seatRow = seatParts[1] || '';
+    const seatNo = seatParts[2] || '';
+    return {
+      sec: seatSec.replace('Sec ', '').replace('Block ', ''),
+      row: seatRow ? seatRow.replace('Row ', '') : 'A',
+      seat: seatNo ? seatNo.replace('Seat ', '') : '1'
+    };
+  }, [ticketInfo]);
+
+  const contextHeaderData = useMemo(() => {
+    if (!ticketInfo || !ticketInfo.gate || !ticketInfo.seat) {
+      return { headerTitle: '', headerDesc: '', glowClass: '', IconComponent: Compass };
+    }
+    let headerTitle = "Pre-Match: Gate is Open";
+    let headerDesc = `Use Gate ${ticketInfo.gate.split(' ')[0]}. Proceed to security check.`;
+    let glowClass = "glow-amber";
+    let IconComponent = Compass;
+
+    if (simPhase === 'gates_open' || !simPhase) {
+      headerTitle = `Pre-Match: Gate ${ticketInfo.gate.split(' ')[0]}`;
+      headerDesc = `Your gate is open. Seat ${ticketInfo.seat.split(',')[0]} is a 4 min walk. Tap to route.`;
+      glowClass = "glow-amber";
+      IconComponent = Compass;
+    } else if (simPhase === 'match_starting') {
+      headerTitle = "Warmups: Teams on Pitch";
+      headerDesc = "Starting lineups active. Find your seat now. Tap for step-free routes.";
+      glowClass = "glow-orange";
+      IconComponent = Flame;
+    } else if (simPhase === 'match_live') {
+      headerTitle = "Live: Tap for AR Stats";
+      headerDesc = "Real-time player tracking & speeds active. Tap to open AR scanner.";
+      glowClass = "glow-cyan";
+      IconComponent = Eye;
+    } else if (simPhase === 'half_time') {
+      headerTitle = "Halftime: Pre-Order Food";
+      headerDesc = "Avoid peak concession lines. Pre-order eco-friendly foods. Tap to Order.";
+      glowClass = "glow-purple";
+      IconComponent = Utensils;
+    } else if (simPhase === 'crowd_exiting') {
+      headerTitle = "Post-Match: Exit & Transit";
+      headerDesc = "Zero-carbon shuttle departs Gate C. Tap to check public transit ID.";
+      glowClass = "glow-green";
+      IconComponent = Globe;
+    }
+
+    return { headerTitle, headerDesc, glowClass, IconComponent };
+  }, [simPhase, ticketInfo]);
+
+  const currentWayfinding = useMemo(() => {
+    if (!activeStadium) return [];
+    return (accessibilityMode && activeStadium.accessibilityWayfinding) ? activeStadium.accessibilityWayfinding : activeStadium.wayfinding;
+  }, [accessibilityMode, activeStadium]);
+
+  const matchupAbbr = useMemo(() => {
+    if (!activeStadium || !activeStadium.currentMatch) return { team1: 'HOM', team2: 'AWY' };
+    const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
+    const team1 = parts[0] || 'HOME';
+    const team2 = parts[1] || 'AWAY';
+    
+    const getAbbr = (teamName) => {
+      const nameLower = teamName.toLowerCase();
+      if (nameLower.includes('argentina')) return 'ARG';
+      if (nameLower.includes('india')) return 'IND';
+      if (nameLower.includes('chelsea')) return 'CHE';
+      if (nameLower.includes('france')) return 'FRA';
+      if (nameLower.includes('australia')) return 'AUS';
+      if (nameLower.includes('arsenal')) return 'ARS';
+      return teamName.substring(0, 3).toUpperCase();
+    };
+    
+    return {
+      team1: getAbbr(team1),
+      team2: getAbbr(team2)
+    };
+  }, [activeStadium]);
+
   // Sync volunteer tasks when active stadium updates
   useEffect(() => {
     if (activeStadium && activeStadium.volunteerTasks) {
@@ -528,7 +222,7 @@ function App() {
     } else {
       setVolunteerTasks([]);
     }
-  }, [currentStadiumId, stadiumsRegistry]);
+  }, [activeStadium]);
 
   // Sync theme attribute with state
   useEffect(() => {
@@ -738,12 +432,6 @@ function App() {
     setIsTestingAll(false);
   };
 
-  // Sector metadata computed dynamically from config
-  const sectorData = {};
-  activeStadium.sectors.forEach(s => {
-    sectorData[s.name] = s;
-  });
-
   // Header Dropdown Search/Filter State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -757,13 +445,6 @@ function App() {
   // Operations State
   const [selectedSector, setSelectedSector] = useState('East Stand');
 
-  // Gate Markers — positioned at the gaps between stadium sectors on the SVG (viewBox 0 0 400 300)
-  const STADIUM_GATES = [
-    { id: 'gate_a', label: 'Gate A', position: 'North', svgX: 200, svgY: 18, queueWait: '3 min', status: 'Open', turnstiles: 12, throughput: '420/hr', ada: true, securityLevel: 'Standard', note: 'Main VIP & media entrance. Fast-track lanes available.' },
-    { id: 'gate_b', label: 'Gate B', position: 'East', svgX: 375, svgY: 150, queueWait: '8 min', status: 'Congested', turnstiles: 16, throughput: '680/hr', ada: true, securityLevel: 'Enhanced', note: 'Primary fan entry. Highest throughput gate. Digital wallet scanners active.' },
-    { id: 'gate_c', label: 'Gate C', position: 'South', svgX: 200, svgY: 282, queueWait: '5 min', status: 'Open', turnstiles: 10, throughput: '350/hr', ada: false, securityLevel: 'Standard', note: 'Family & accessibility zone. Closest to parking lots P3-P5.' },
-    { id: 'gate_d', label: 'Gate D', position: 'West', svgX: 25, svgY: 150, queueWait: '2 min', status: 'Open', turnstiles: 8, throughput: '280/hr', ada: true, securityLevel: 'Standard', note: 'Staff & volunteer staging entrance. Lowest congestion.' },
-  ];
   const [selectedGateInfo, setSelectedGateInfo] = useState(null);
 
   const [incidents, setIncidents] = useState([
@@ -813,119 +494,11 @@ function App() {
   const [isDispatching, setIsDispatching] = useState(false);
 
   // Fan Portal State
-  const [selectedGate, setSelectedGate] = useState('Gate B');
   const [currentRouteStep, setCurrentRouteStep] = useState(1);
   const [orders, setOrders] = useState([]);
   const [activeOrderMsg, setActiveOrderMsg] = useState('');
 
-  const ticketInfo = activeStadium.ticket;
-  const concessionsList = activeStadium.concessions.filter(item => {
-    if (selectedConcessionCategory === 'All') return true;
-    if (selectedConcessionCategory === 'Plant-Based') {
-      return item.sustainability && item.sustainability.includes('Plant-Based');
-    }
-    if (selectedConcessionCategory === 'Zero-Waste') {
-      return item.sustainability && (item.sustainability.includes('Zero-Plastic') || item.sustainability.includes('Zero-Waste'));
-    }
-    return true;
-  });
-
   // ── Game Simulation Engine ──────────────────────────────────────────────────
-  // Phase definitions: each maps 4 sector names → { density%, colorClass, status }
-  const SIM_PHASES = {
-    gates_open: {
-      label: 'Gates Open',
-      icon: '🚪',
-      color: 'var(--color-success)',
-      desc: 'Fans streaming in through entry gates. North & East filling up.',
-      sectors: {
-        'North Stand': { density: '42%', colorClass: 'sector-low', status: 'Filling Up' },
-        'East Stand':  { density: '61%', colorClass: 'sector-medium', status: 'Moderate Flow' },
-        'South Stand': { density: '28%', colorClass: 'sector-low', status: 'Early Arrivals' },
-        'West Stand':  { density: '35%', colorClass: 'sector-low', status: 'Normal Flow' },
-      }
-    },
-    match_starting: {
-      label: 'Match Starting',
-      icon: '⚡',
-      color: 'var(--color-warning)',
-      desc: 'All stands filling rapidly. Concessions at peak load.',
-      sectors: {
-        'North Stand': { density: '79%', colorClass: 'sector-medium', status: 'Heavy Flow' },
-        'East Stand':  { density: '85%', colorClass: 'sector-high', status: 'Congested' },
-        'South Stand': { density: '71%', colorClass: 'sector-medium', status: 'Filling Fast' },
-        'West Stand':  { density: '88%', colorClass: 'sector-high', status: 'At Capacity' },
-      }
-    },
-    match_live: {
-      label: 'Match Live',
-      icon: '🔴',
-      color: 'var(--color-danger)',
-      desc: 'All sectors at peak. Gates secured. Operations on alert.',
-      sectors: {
-        'North Stand': { density: '94%', colorClass: 'sector-high', status: 'Severe Congestion' },
-        'East Stand':  { density: '91%', colorClass: 'sector-high', status: 'Severe Congestion' },
-        'South Stand': { density: '96%', colorClass: 'sector-high', status: 'At Max Capacity' },
-        'West Stand':  { density: '93%', colorClass: 'sector-high', status: 'Severe Congestion' },
-      }
-    },
-    half_time: {
-      label: 'Half Time',
-      icon: '⏸',
-      color: 'var(--color-purple)',
-      desc: 'Mass movement to concession stands. Corridors at risk.',
-      sectors: {
-        'North Stand': { density: '55%', colorClass: 'sector-medium', status: 'Evacuating Seats' },
-        'East Stand':  { density: '48%', colorClass: 'sector-low', status: 'Moving to Concessions' },
-        'South Stand': { density: '67%', colorClass: 'sector-medium', status: 'Partial Evacuation' },
-        'West Stand':  { density: '52%', colorClass: 'sector-medium', status: 'Moderate Movement' },
-      }
-    },
-    crowd_exiting: {
-      label: 'Crowd Exiting',
-      icon: '🚶',
-      color: '#94a3b8',
-      desc: 'Final whistle blown. Coordinated wave exit underway.',
-      sectors: {
-        'North Stand': { density: '38%', colorClass: 'sector-low', status: 'Wave 1 Exiting' },
-        'East Stand':  { density: '22%', colorClass: 'sector-low', status: 'Clearing' },
-        'South Stand': { density: '44%', colorClass: 'sector-low', status: 'Wave 2 Exiting' },
-        'West Stand':  { density: '17%', colorClass: 'sector-low', status: 'Almost Clear' },
-      }
-    }
-  };
-
-  const SIM_SECONDARY_METRICS = {
-    gates_open: {
-      scanRate: { value: '12.4%', trend: '+12.4% stream-in progress', status: 'up' },
-      securityWait: { value: '2.8m', trend: 'Fastest at South Gate C', status: 'down' },
-      concessions: { value: 'Low', trend: 'Avg queue: 3.1 minutes', status: 'down' }
-    },
-    match_starting: {
-      scanRate: { value: '48.2%', trend: 'Surging +28.5% scan rate', status: 'up' },
-      securityWait: { value: '18.5m', trend: 'Surging at West Gate D', status: 'up' },
-      concessions: { value: 'High', trend: 'Avg queue: 12.0 minutes', status: 'up' }
-    },
-    match_live: {
-      scanRate: { value: '96.1%', trend: 'All seats occupied', status: 'up' },
-      securityWait: { value: '1.2m', trend: 'Gates secured', status: 'down' },
-      concessions: { value: 'Moderate', trend: 'Avg queue: 4.5 minutes', status: 'down' }
-    },
-    half_time: {
-      scanRate: { value: '96.8%', trend: 'Halftime exit scans stable', status: 'up' },
-      securityWait: { value: '0.8m', trend: 'Gates secured', status: 'down' },
-      concessions: { value: 'Critical', trend: 'Avg queue: 19.8 minutes (Halftime rush)', status: 'up' }
-    },
-    crowd_exiting: {
-      scanRate: { value: '99.9%', trend: 'Event completed', status: 'down' },
-      securityWait: { value: '0.0m', trend: 'Gates open for egress', status: 'down' },
-      concessions: { value: 'Closed', trend: 'Avg queue: 0.0 minutes', status: 'down' }
-    }
-  };
-
-  const [simPhase, setSimPhase] = useState(null);       // active phase key or null
-  const [simTick, setSimTick] = useState(0);            // drives micro-fluctuations
-  const simIntervalRef = useRef(null);
 
   // Start / stop the tick timer whenever simPhase changes
   useEffect(() => {
@@ -939,21 +512,24 @@ function App() {
   }, [simPhase]);
 
   // Build the active sector data: simulation overrides real config when a phase is active
-  const sectorNames = ['North Stand', 'East Stand', 'South Stand', 'West Stand'];
-  const simulatedSectorData = {};
-  sectorNames.forEach(name => {
-    const base = sectorData[name];
-    if (simPhase && SIM_PHASES[simPhase]) {
-      const override = SIM_PHASES[simPhase].sectors[name];
-      // Add subtle ±2% tick fluctuation to density number for live feel
-      const basePct = parseInt(override.density);
-      const fluctuation = (simTick % 3 === 0) ? 1 : (simTick % 3 === 1) ? -1 : 0;
-      const livePct = Math.min(99, Math.max(1, basePct + fluctuation));
-      simulatedSectorData[name] = { ...base, ...override, density: `${livePct}%` };
-    } else {
-      simulatedSectorData[name] = base;
-    }
-  });
+  const simulatedSectorData = useMemo(() => {
+    const sectorNames = ['North Stand', 'East Stand', 'South Stand', 'West Stand'];
+    const data = {};
+    sectorNames.forEach(name => {
+      const base = sectorData[name];
+      if (simPhase && SIM_PHASES[simPhase]) {
+        const override = SIM_PHASES[simPhase].sectors[name];
+        // Add subtle ±2% tick fluctuation to density number for live feel
+        const basePct = parseInt(override.density);
+        const fluctuation = (simTick % 3 === 0) ? 1 : (simTick % 3 === 1) ? -1 : 0;
+        const livePct = Math.min(99, Math.max(1, basePct + fluctuation));
+        data[name] = { ...base, ...override, density: `${livePct}%` };
+      } else {
+        data[name] = base;
+      }
+    });
+    return data;
+  }, [sectorData, simPhase, simTick]);
   // ────────────────────────────────────────────────────────────────────────────
 
   // AI Assistant State
@@ -1030,7 +606,7 @@ function App() {
         reasoning: `Initialized operations assistant context for ${activeStadium.name} and match ${activeStadium.currentMatch}.`
       }
     ]);
-  }, [currentStadiumId]);
+  }, [activeStadium.name, activeStadium.currentMatch]);
 
   // Dynamically append new insights based on active simulation phase
   useEffect(() => {
@@ -1419,36 +995,32 @@ function App() {
 
   // API Call to Gemini
   const callGeminiAPI = async (promptText) => {
-    try {
-      // Map selected UI model route to actual Gemini API model endpoints
-      let apiModel = 'gemini-1.5-flash';
-      if (selectedRouteModel === 'flash_3_5_low') {
-        apiModel = 'gemini-1.5-flash';
-      } else if (selectedRouteModel === 'flash_3_5_medium') {
-        apiModel = 'gemini-2.0-flash';
-      } else if (selectedRouteModel === 'flash_3_5_high') {
-        apiModel = 'gemini-2.5-flash';
-      } else if (selectedRouteModel === 'sonnet_4_6_thinking') {
-        apiModel = 'gemini-2.0-flash-thinking-exp';
-      } else if (selectedRouteModel === 'opus_4_6') {
-        apiModel = 'gemini-1.5-pro';
-      }
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
-          })
-        }
-      );
-      const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
-    } catch (e) {
-      throw e;
+    // Map selected UI model route to actual Gemini API model endpoints
+    let apiModel = 'gemini-1.5-flash';
+    if (selectedRouteModel === 'flash_3_5_low') {
+      apiModel = 'gemini-1.5-flash';
+    } else if (selectedRouteModel === 'flash_3_5_medium') {
+      apiModel = 'gemini-2.0-flash';
+    } else if (selectedRouteModel === 'flash_3_5_high') {
+      apiModel = 'gemini-2.5-flash';
+    } else if (selectedRouteModel === 'sonnet_4_6_thinking') {
+      apiModel = 'gemini-2.0-flash-thinking-exp';
+    } else if (selectedRouteModel === 'opus_4_6') {
+      apiModel = 'gemini-1.5-pro';
     }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${geminiApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }]
+        })
+      }
+    );
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
   };
 
   // AI Assistant Query handling
@@ -1835,34 +1407,50 @@ function App() {
 
         {/* Navigation Tabs — separate row */}
         <div className="navigation-tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', gap: '0.4rem' }} role="tablist" aria-label="Operations Console Navigation">
             <button 
+              id="tab-operations"
+              role="tab"
+              aria-selected={activeTab === 'operations'}
+              aria-controls="tabpanel-operations"
               className={`nav-tab-btn ${activeTab === 'operations' ? 'active' : ''}`}
               onClick={() => setActiveTab('operations')}
             >
-              <Shield size={16} />
+              <Shield size={16} aria-hidden="true" />
               Operations Command
             </button>
             <button 
+              id="tab-fan"
+              role="tab"
+              aria-selected={activeTab === 'fan'}
+              aria-controls="tabpanel-fan"
               className={`nav-tab-btn ${activeTab === 'fan' ? 'active' : ''}`}
               onClick={() => setActiveTab('fan')}
             >
-              <User size={16} />
+              <User size={16} aria-hidden="true" />
               Fan Portal
             </button>
             <button 
+              id="tab-assistant"
+              role="tab"
+              aria-selected={activeTab === 'assistant'}
+              aria-controls="tabpanel-assistant"
               className={`nav-tab-btn ${activeTab === 'assistant' ? 'active' : ''} ai-assistant-toggle`}
               onClick={() => setActiveTab('assistant')}
             >
-              <MessageSquare size={16} />
+              <MessageSquare size={16} aria-hidden="true" />
               AI Assistant
             </button>
             {isDevMode && (
               <button 
+                id="tab-architecture"
+                role="tab"
+                aria-selected={activeTab === 'architecture'}
+                aria-controls="tabpanel-architecture"
                 className={`nav-tab-btn ${activeTab === 'architecture' ? 'active' : ''}`}
                 onClick={() => setActiveTab('architecture')}
               >
-                <Cpu size={16} />
+                <Cpu size={16} aria-hidden="true" />
                 System Architecture
               </button>
             )}
@@ -1990,7 +1578,7 @@ function App() {
         
         {/* Tab 1: Operations Dashboard */}
         {activeTab === 'operations' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} role="tabpanel" id="tabpanel-operations" aria-labelledby="tab-operations">
             {/* FIFA World Cup 2026 Live Stats Summary Widget */}
             <div className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--theme-accent-country, var(--border-color))', background: 'var(--gradient-stats-card)', position: 'relative', overflow: 'hidden', transition: 'all 0.3s ease' }}>
               <div style={{ position: 'absolute', top: '-15px', right: '-10px', fontSize: '4.5rem', opacity: 0.08, pointerEvents: 'none', fontWeight: 900, fontFamily: 'var(--heading)', color: 'var(--text-primary)' }}>2026</div>
@@ -2150,26 +1738,18 @@ function App() {
                   />
 
                   {/* Active Progress Line */}
-                  {(() => {
-                    const keys = Object.keys(SIM_PHASES);
-                    const activeIndex = simPhase ? keys.indexOf(simPhase) : -1;
-                    const progressPercent = activeIndex >= 0 ? (activeIndex / (keys.length - 1)) * 100 : 0;
-                    const activeColor = simPhase ? SIM_PHASES[simPhase].color : 'var(--color-primary)';
-                    return (
-                      <div style={{
-                        position: 'absolute',
-                        left: '40px',
-                        width: `calc(${progressPercent}% - 40px)`,
-                        height: '4px',
-                        background: activeColor,
-                        top: '32px',
-                        zIndex: 2,
-                        borderRadius: '2px',
-                        boxShadow: `0 0 10px ${activeColor}`,
-                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-                      }} />
-                    );
-                  })()}
+                  <div style={{
+                    position: 'absolute',
+                    left: '40px',
+                    width: `calc(${simProgress.progressPercent}% - 40px)`,
+                    height: '4px',
+                    background: simProgress.activeColor,
+                    top: '32px',
+                    zIndex: 2,
+                    borderRadius: '2px',
+                    boxShadow: `0 0 10px ${simProgress.activeColor}`,
+                    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }} />
 
                   {/* Stepped Nodes */}
                   {Object.entries(SIM_PHASES).map(([key, phase], idx) => {
@@ -2838,6 +2418,7 @@ function App() {
                   <input
                     type="text"
                     placeholder="Duty description..."
+                    aria-label="Duty description"
                     value={volTaskName}
                     onChange={(e) => setVolTaskName(e.target.value)}
                     style={{ flex: '2 1 150px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none' }}
@@ -2845,16 +2426,40 @@ function App() {
                   <input
                     type="text"
                     placeholder="Location..."
+                    aria-label="Location"
                     value={volTaskLoc}
                     onChange={(e) => setVolTaskLoc(e.target.value)}
                     style={{ flex: '1 1 90px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none' }}
                   />
+                  <select
+                    aria-label="Volunteer crew"
+                    value={volTaskCrew}
+                    onChange={(e) => setVolTaskCrew(e.target.value)}
+                    style={{ flex: '1 1 120px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none' }}
+                  >
+                    <option value="Green Volunteers">Green Volunteers</option>
+                    <option value="Staff Crew Alpha">Staff Crew Alpha</option>
+                    <option value="Accessibility Team">Accessibility Team</option>
+                    <option value="Languages Team">Languages Team</option>
+                  </select>
+                  <select
+                    aria-label="Task priority"
+                    value={volTaskPriority}
+                    onChange={(e) => setVolTaskPriority(e.target.value)}
+                    style={{ flex: '1 1 90px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none' }}
+                  >
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                  </select>
                   <button
                     onClick={() => {
                       if (!volTaskName || !volTaskLoc) return;
                       handleAddVolunteerTask(volTaskName, volTaskLoc, volTaskCrew, volTaskPriority);
                       setVolTaskName('');
                       setVolTaskLoc('');
+                      setVolTaskCrew('Green Volunteers');
+                      setVolTaskPriority('medium');
                     }}
                     className="btn btn-primary"
                     style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', borderRadius: 4 }}
@@ -2910,27 +2515,13 @@ function App() {
         )}
 
         {/* Tab 2: Fan Experience Portal */}
-        {activeTab === 'fan' && (() => {
-          const helpData = HELPDESK_REGISTRY[activeStadium.id] || {
-            country: activeStadium.country || "International",
-            flag: "🌐",
-            emergency: "112 / Local Police",
-            smsContact: "Contact Stadium Staff",
-            bagPolicy: "Standard stadium bag policy: clear bags or small purses subject to search.",
-            payment: "Contactless cards and major mobile wallets accepted.",
-            transport: "Check local transit schedules. Shuttle services available from main parking lots.",
-            prohibited: "Dangerous items, weapons, large bags, professional recording devices."
-          };
-          return (
-            <div className="fan-portal-layout">
-              {/* Left Column Container */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {activeTab === 'fan' && (
+          <div className="fan-portal-layout" role="tabpanel" id="tabpanel-fan" aria-labelledby="tab-fan">
+            {/* Left Column Container */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
             {/* ── Live Route Visualizer Panel ── */}
-            {(() => {
-              const currentRoutePoints = (accessibilityMode && activeStadium.accessibilityRoute) ? activeStadium.accessibilityRoute : activeStadium.svgRoute;
-              return (
-                <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <div className="card-header">
                     <h2 className="card-title">
                       <Navigation size={20} style={{ color: 'var(--color-primary)' }} />
@@ -2940,6 +2531,8 @@ function App() {
                       <button 
                         onClick={() => setAccessibilityMode(!accessibilityMode)}
                         className="btn"
+                        aria-pressed={accessibilityMode}
+                        aria-label="Toggle step-free accessibility route"
                         style={{
                           padding: '0.25rem 0.5rem',
                           fontSize: '0.65rem',
@@ -2953,7 +2546,7 @@ function App() {
                           cursor: 'pointer'
                         }}
                       >
-                        <Accessibility size={12} />
+                        <Accessibility size={12} aria-hidden="true" />
                         ADA: {accessibilityMode ? 'ON' : 'OFF'}
                       </button>
                       <span style={{
@@ -2966,7 +2559,9 @@ function App() {
 
                   {/* SVG Map with animated route overlay */}
                   <div className="map-visualizer" style={{ position: 'relative' }}>
-                    <svg className="stadium-svg" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg className="stadium-svg" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="map-title map-desc">
+                      <title id="map-title">Stadium Map and Wayfinding Route</title>
+                      <desc id="map-desc">Interactive SVG map displaying stadium stands, entry gates, concessions, and the route visualizer tracking path to seat.</desc>
                       {/* Dynamic Stadium Background & Playing Field */}
                       {renderStadiumMapElements(currentStadiumId, true)}
 
@@ -3079,8 +2674,6 @@ function App() {
                     <strong style={{ color: 'var(--color-primary)' }}>How it works:</strong> Route dots are computed from the stadium\'s spatial waypoint registry. In production, the fan\'s GPS/Bluetooth coordinates update this path in real-time using crowd-density-aware pathfinding.
                   </p>
                 </div>
-              );
-            })()}
 
             {/* Help & Emergency Policy Card */}
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
@@ -3197,74 +2790,38 @@ function App() {
                 {phoneSubView === 'home' && (
                   <>
                     {/* Dynamic Context Header */}
-                    {(() => {
-                      let headerTitle = "Pre-Match: Gate is Open";
-                      let headerDesc = `Use Gate ${ticketInfo.gate.split(' ')[0]}. Proceed to security check.`;
-                      let glowClass = "glow-amber";
-                      let IconComponent = Compass;
-
-                      if (simPhase === 'gates_open' || !simPhase) {
-                        headerTitle = `Pre-Match: Gate ${ticketInfo.gate.split(' ')[0]}`;
-                        headerDesc = `Your gate is open. Seat ${ticketInfo.seat.split(',')[0]} is a 4 min walk. Tap to route.`;
-                        glowClass = "glow-amber";
-                        IconComponent = Compass;
-                      } else if (simPhase === 'match_starting') {
-                        headerTitle = "Warmups: Teams on Pitch";
-                        headerDesc = "Starting lineups active. Find your seat now. Tap for step-free routes.";
-                        glowClass = "glow-orange";
-                        IconComponent = Flame;
-                      } else if (simPhase === 'match_live') {
-                        headerTitle = "Live: Tap for AR Stats";
-                        headerDesc = "Real-time player tracking & speeds active. Tap to open AR scanner.";
-                        glowClass = "glow-cyan";
-                        IconComponent = Eye;
-                      } else if (simPhase === 'half_time') {
-                        headerTitle = "Halftime: Pre-Order Food";
-                        headerDesc = "Avoid peak concession lines. Pre-order eco-friendly foods. Tap to Order.";
-                        glowClass = "glow-purple";
-                        IconComponent = Utensils;
-                      } else if (simPhase === 'crowd_exiting') {
-                        headerTitle = "Post-Match: Exit & Transit";
-                        headerDesc = "Zero-carbon shuttle departs Gate C. Tap to check public transit ID.";
-                        glowClass = "glow-green";
-                        IconComponent = Globe;
-                      }
-
-                      return (
-                        <div 
-                          className={`context-header-card ${glowClass}`}
-                          onClick={() => {
-                            if (simPhase === 'match_live') {
-                              setPhoneSubView('ar');
-                            } else if (simPhase === 'half_time') {
-                              setPhoneSubView('pickup');
-                            } else if (simPhase === 'crowd_exiting') {
-                              setPhoneSubView('ticket');
-                            } else {
-                              setPhoneSubView('navigation');
-                            }
-                          }}
-                          style={{ position: 'relative', zIndex: 1 }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              padding: '0.4rem',
-                              borderRadius: '6px',
-                              background: 'rgba(255,255,255,0.04)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <IconComponent size={16} style={{ color: glowClass === 'glow-amber' ? 'var(--color-primary)' : glowClass === 'glow-orange' ? 'var(--color-warning)' : glowClass === 'glow-cyan' ? 'var(--color-accent)' : glowClass === 'glow-purple' ? 'var(--color-purple)' : 'var(--color-success)' }} />
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{headerTitle}</div>
-                              <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.1rem', lineHeight: '1.25' }}>{headerDesc}</div>
-                            </div>
-                          </div>
+                    <div 
+                      className={`context-header-card ${contextHeaderData.glowClass}`}
+                      onClick={() => {
+                        if (simPhase === 'match_live') {
+                          setPhoneSubView('ar');
+                        } else if (simPhase === 'half_time') {
+                          setPhoneSubView('pickup');
+                        } else if (simPhase === 'crowd_exiting') {
+                          setPhoneSubView('ticket');
+                        } else {
+                          setPhoneSubView('navigation');
+                        }
+                      }}
+                      style={{ position: 'relative', zIndex: 1 }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{
+                          padding: '0.4rem',
+                          borderRadius: '6px',
+                          background: 'rgba(255,255,255,0.04)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <contextHeaderData.IconComponent size={16} style={{ color: contextHeaderData.glowClass === 'glow-amber' ? 'var(--color-primary)' : contextHeaderData.glowClass === 'glow-orange' ? 'var(--color-warning)' : contextHeaderData.glowClass === 'glow-cyan' ? 'var(--color-accent)' : contextHeaderData.glowClass === 'glow-purple' ? 'var(--color-purple)' : 'var(--color-success)' }} />
                         </div>
-                      );
-                    })()}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{contextHeaderData.headerTitle}</div>
+                          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.1rem', lineHeight: '1.25' }}>{contextHeaderData.headerDesc}</div>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* Active Notifications Banner */}
                     {activeOrderMsg && (
@@ -3456,7 +3013,7 @@ function App() {
 
                       {/* Sponsors Grid / Horizontal Scroll */}
                       <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', padding: '0.1rem 0' }}>
-                        {SPONSORS.filter(s => sponsorTierFilter === 'all' || s.tier === sponsorTierFilter).map(sponsor => (
+                        {filteredSponsors.map(sponsor => (
                           <div
                             key={sponsor.name}
                             onClick={() => setSelectedSponsor(selectedSponsor?.name === sponsor.name ? null : sponsor)}
@@ -3520,51 +3077,23 @@ function App() {
                         <span style={{ fontSize: '0.7rem', color: 'var(--color-success)', fontWeight: 700 }}>ACTIVE</span>
                       </div>
                       <div className="ticket-matchup">
-                        <span className="team-abbr">
-                          {(() => {
-                            const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
-                            const team1 = parts[0] || 'HOME';
-                            if (team1.toLowerCase().includes('argentina')) return 'ARG';
-                            if (team1.toLowerCase().includes('india')) return 'IND';
-                            if (team1.toLowerCase().includes('chelsea')) return 'CHE';
-                            return team1.substring(0, 3).toUpperCase();
-                          })()}
-                        </span>
+                        <span className="team-abbr">{matchupAbbr.team1}</span>
                         <span className="match-vs">VS</span>
-                        <span className="team-abbr">
-                          {(() => {
-                            const parts = activeStadium.currentMatch.split(' (')[0].split(' vs ');
-                            const team2 = parts[1] || 'AWAY';
-                            if (team2.toLowerCase().includes('france')) return 'FRA';
-                            if (team2.toLowerCase().includes('australia')) return 'AUS';
-                            if (team2.toLowerCase().includes('arsenal')) return 'ARS';
-                            return team2.substring(0, 3).toUpperCase();
-                          })()}
-                        </span>
+                        <span className="team-abbr">{matchupAbbr.team2}</span>
                       </div>
                       <div className="ticket-meta-grid">
-                        {(() => {
-                          const seatParts = ticketInfo.seat.split(', ');
-                          const seatSec = seatParts[0] || '';
-                          const seatRow = seatParts[1] || '';
-                          const seatNo = seatParts[2] || '';
-                          return (
-                            <>
-                              <div>
-                                <div className="ticket-meta-label">SECTOR / BLOCK</div>
-                                <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{seatSec.replace('Sec ', '').replace('Block ', '')}</div>
-                              </div>
-                              <div>
-                                <div className="ticket-meta-label">ROW</div>
-                                <div className="ticket-meta-val">{seatRow ? seatRow.replace('Row ', '') : 'A'}</div>
-                              </div>
-                              <div>
-                                <div className="ticket-meta-label">SEAT</div>
-                                <div className="ticket-meta-val">{seatNo ? seatNo.replace('Seat ', '') : '1'}</div>
-                              </div>
-                            </>
-                          );
-                        })()}
+                        <div>
+                          <div className="ticket-meta-label">SECTOR / BLOCK</div>
+                          <div className="ticket-meta-val" style={{ fontSize: '0.75rem' }}>{ticketSeatDetails.sec}</div>
+                        </div>
+                        <div>
+                          <div className="ticket-meta-label">ROW</div>
+                          <div className="ticket-meta-val">{ticketSeatDetails.row}</div>
+                        </div>
+                        <div>
+                          <div className="ticket-meta-label">SEAT</div>
+                          <div className="ticket-meta-val">{ticketSeatDetails.seat}</div>
+                        </div>
                       </div>
                       <div className="ticket-meta-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                         <div>
@@ -3633,24 +3162,21 @@ function App() {
                         Route: {accessibilityMode ? 'ADA Elevator Route' : `Gate ${ticketInfo.gate.split(' ')[0]} Standard`}
                       </h4>
                       
-                      {(() => {
-                        const currentWayfinding = (accessibilityMode && activeStadium.accessibilityWayfinding) ? activeStadium.accessibilityWayfinding : activeStadium.wayfinding;
-                        return currentWayfinding.map((stepItem, idx) => {
-                          const isDone = currentRouteStep > idx;
-                          const isActive = currentRouteStep === idx;
-                          return (
-                            <div key={idx} className={`nav-route-step ${isDone ? 'done' : isActive ? 'active' : ''}`} style={{ paddingBottom: idx === currentWayfinding.length - 1 ? 0 : '1rem' }}>
-                              <div className="nav-step-icon">
-                                {isDone ? <Check size={10} /> : isActive ? <Flame size={10} /> : idx + 1}
-                              </div>
-                              <div className="nav-step-text">
-                                <div className="nav-step-title" style={{ fontSize: '0.78rem' }}>{stepItem.title}</div>
-                                <div className="nav-step-desc" style={{ fontSize: '0.68rem' }}>{stepItem.desc}</div>
-                              </div>
+                      {currentWayfinding.map((stepItem, idx) => {
+                        const isDone = currentRouteStep > idx;
+                        const isActive = currentRouteStep === idx;
+                        return (
+                          <div key={idx} className={`nav-route-step ${isDone ? 'done' : isActive ? 'active' : ''}`} style={{ paddingBottom: idx === currentWayfinding.length - 1 ? 0 : '1rem' }}>
+                            <div className="nav-step-icon">
+                              {isDone ? <Check size={10} /> : isActive ? <Flame size={10} /> : idx + 1}
                             </div>
-                          );
-                        });
-                      })()}
+                            <div className="nav-step-text">
+                              <div className="nav-step-title" style={{ fontSize: '0.78rem' }}>{stepItem.title}</div>
+                              <div className="nav-step-desc" style={{ fontSize: '0.68rem' }}>{stepItem.desc}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Restroom Wait Time Tracker */}
@@ -4137,12 +3663,11 @@ function App() {
             </div>
             </div>
           </div>
-          );
-        })()}
+        )}
 
         {/* Tab 3: AI Operations Assistant */}
         {activeTab === 'assistant' && (
-          <div className="ai-assistant-layout">
+          <div className="ai-assistant-layout" role="tabpanel" id="tabpanel-assistant" aria-labelledby="tab-assistant">
             
             {/* Left Pane: Live Intelligence Feed */}
             <div className="intelligence-feed-container">
@@ -4290,6 +3815,7 @@ function App() {
                 <input 
                   type="text" 
                   className="chat-input" 
+                  aria-label="Operations Assistant Prompt"
                   placeholder="Ask about directions, queues, safety reports, stadium policies..." 
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
@@ -4308,7 +3834,7 @@ function App() {
 
         {/* Tab 4: System Architecture & Model Routing */}
         {activeTab === 'architecture' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }} role="tabpanel" id="tabpanel-architecture" aria-labelledby="tab-architecture">
             
             {/* Model Selector & Live Spec Calculator */}
             <div className="glass-card" style={{ padding: '1.5rem' }}>

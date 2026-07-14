@@ -1,0 +1,54 @@
+/* Main layout grid + glass-card base styling */
+
+/* Main Layout Grid */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+/* Card Styling — restrained glass, warmer */
+.glass-card {
+  background: rgba(15, 19, 24, 0.65);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px) saturate(1.2);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.card-title {
+  font-family: var(--heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
