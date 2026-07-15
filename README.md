@@ -10,14 +10,60 @@ GitHub Repository: **[https://github.com/Piyush200p/virtual_prompt_war](https://
 
 ## 📖 Table of Contents
 1. [Project Vision & Core Objectives](#-project-vision--core-objectives)
-2. [Chosen Vertical & Challenge Alignment](#-chosen-vertical--challenge-alignment)
-3. [Dual-Portal Architecture](#-dual-portal-architecture)
-4. [Generative AI & Prompt Engineering Strategy](#-generative-ai--prompt-engineering-strategy)
-5. [Aesthetics & Design System](#-aesthetics--design-system)
-6. [Technical Implementation & Tech Stack](#-technical-implementation--tech-stack)
-7. [Approach, Logic & How it Works](#-approach-logic--how-it-works)
-8. [Assumptions Made](#-assumptions-made)
-9. [Getting Started & Local Installation](#-getting-started--local-installation)
+2. [System Architecture & Data Flow Diagram](#-system-architecture--data-flow-diagram)
+3. [Chosen Vertical & Challenge Alignment](#-chosen-vertical--challenge-alignment)
+4. [Dual-Portal Architecture](#-dual-portal-architecture)
+5. [Generative AI & Prompt Engineering Strategy](#-generative-ai--prompt-engineering-strategy)
+6. [Aesthetics & Design System](#-aesthetics--design-system)
+7. [Technical Implementation & Tech Stack](#-technical-implementation--tech-stack)
+8. [Approach, Logic & How it Works](#-approach-logic--how-it-works)
+9. [Assumptions Made](#-assumptions-made)
+10. [Getting Started & Local Installation](#-getting-started--local-installation)
+
+---
+
+## 🏗️ System Architecture & Data Flow Diagram
+
+ArenaFlow separates concerns using a **Three-Layer Architecture** (Directive, Orchestration, and Execution layers) combined with an intelligent **Model Routing Agent** to ensure security, safety-alignment, and optimal performance/cost profiles:
+
+```mermaid
+flowchart TD
+    subgraph Layer1 [1. Directive Layer: Declarative SOPs]
+        Directives["directives/ - Operations SOPs<br>- Emergency Dispatch Rules<br>- Accessibility Guidelines"]
+    end
+
+    subgraph Layer2 [2. Orchestration Layer: GenAI Prompt Agent]
+        ReactClient["src/App.jsx - React Context & State Manager<br>- Chatbot User Input Sanitization<br>- Caching & Abort Controller Timeouts<br>- Dynamic RTL Mappings"]
+        ContextAssembly["Prompt Assembly<br>(Injects active seat, concessions,<br>transit, weather & grid telemetry)"]
+        ModelRouter{"Model Routing Agent"}
+    end
+
+    subgraph Layer3 [3. Execution Layer: Deterministic Tasks]
+        StadiumDB["src/data/stadiums.js<br>(Seeded venue coordinate registers)"]
+        LocalTests["execution/run_tests.py<br>& tests/ (Automated test suites)"]
+        RouteOptimization["Wayfinding Route Optimization<br>(Dynamic bypass coordinate vectors)"]
+    end
+
+    %% Flow connections
+    Directives -->|Provides semantic anchor| ReactClient
+    ReactClient -->|Retrieves telemetry| StadiumDB
+    ReactClient --> ContextAssembly
+    ContextAssembly --> ModelRouter
+    
+    ModelRouter -->|Simple queries: Low latency/cost| GeminiFlash["Gemini 2.0/3.5 Flash"]
+    ModelRouter -->|Dispatcher anomalies: High reasoning| GeminiPro["Gemini 1.5 Pro / Reasoning Exp"]
+    
+    GeminiFlash -->|Grounded response| ReactClient
+    GeminiPro -->|Grounded response| ReactClient
+    
+    ReactClient -->|Updates state/alert UI| RouteOptimization
+    LocalTests -->|Validates schemas & logic| StadiumDB
+```
+
+This ensures that:
+*   **Generative AI is a phrasing & reasoning layer**: Deterministic constraints (like route calculations, stand density ratios, and transit wait times) are resolved first in React state registers; the LLM is only used to format natural, localized, and polite recommendations.
+*   **Context Grounding is enforced**: Every LLM call is grounded in the authoritative venue schema, preventing hallucination.
+*   **Safety-Closed Design**: If API key input is missing or the connection fails/times out, a localized keyword-based offline fallback parser handles queries gracefully in 6 languages.
 
 ---
 

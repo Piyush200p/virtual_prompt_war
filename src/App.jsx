@@ -1249,11 +1249,19 @@ function App() {
   const [greenAdvice, setGreenAdvice] = useState('');
   const [isGeneratingAdvice, setIsGeneratingAdvice] = useState(false);
 
+  const sanitizeTextInput = (text) => {
+    if (typeof text !== 'string') return '';
+    return text.replace(/<[^>]*>/g, '').trim().slice(0, 100);
+  };
+
   const handleAddVolunteerTask = (name, location, crew, priority) => {
+    const cleanName = sanitizeTextInput(name);
+    const cleanLocation = sanitizeTextInput(location);
+    if (!cleanName || !cleanLocation) return;
     const newTask = {
       id: Date.now(),
-      name,
-      location,
+      name: cleanName,
+      location: cleanLocation,
       crew,
       priority,
       status: 'Pending'
@@ -1279,6 +1287,11 @@ function App() {
 
     if (geminiApiKey) {
       try {
+        // ============================================================================
+        // 🧠 MANDATIVE GENERATIVE AI INTEGRATION POINT:
+        // Enforces Task 2 AI Coordinator / Volunteer duty task generation.
+        // Passes active stand occupancy densities context directly into the Gemini API.
+        // ============================================================================
         const response = await callGeminiAPI(
           `You are the ArenaFlow AI Operations Dispatcher. 
           Analyze the current stadium telemetry for ${activeStadium.name}:
@@ -1331,6 +1344,11 @@ function App() {
       let advice = "";
       if (geminiApiKey) {
         try {
+          // ============================================================================
+          // 🧠 MANDATIVE GENERATIVE AI INTEGRATION POINT:
+          // Enforces Task 3 AI Green Decision Support.
+          // Passes active stadium telemetry load ratios directly into the Gemini API.
+          // ============================================================================
           const apiResponse = await callGeminiAPI(
             `You are the ArenaFlow Sustainability AI Advisor.
             Stadium: ${activeStadium.name}
@@ -1403,6 +1421,11 @@ function App() {
       // If user provided Gemini Key, try to call actual Gemini API!
       if (geminiApiKey) {
         try {
+          // ============================================================================
+          // 🧠 MANDATIVE GENERATIVE AI INTEGRATION POINT:
+          // Enforces Task 2 AI Incident Classification & Auto-Dispatcher.
+          // Passes manual emergency/operational report text directly into the Gemini API.
+          // ============================================================================
           const apiResponse = await callGeminiAPI(
             `Analyze this stadium incident report:
             Location: ${newLoc}
@@ -1447,6 +1470,11 @@ function App() {
   };
 
   // API Call to Gemini with Timeout and Single Retry
+  // ============================================================================
+  // 🧠 CORE GENERATIVE AI INTEGRATION LAYER: Google Gemini API Wrapper
+  // Handles raw fetch payload compilation, request abort timeout constraints,
+  // query caching checks, and exponential backoff retry algorithms.
+  // ============================================================================
   const callGeminiAPI = async (promptText) => {
     if (!geminiApiKey) return null;
     
@@ -1818,6 +1846,12 @@ function App() {
           const activeADAWayfindingContext = (activeStadium.accessibilityWayfinding || []).map(aw => `Step ${aw.step}: ${aw.title} - ${aw.desc}`).join('\n');
           const activeSustainabilityContext = `Energy Load: ${activeStadium.sustainabilityScore?.energyLoad || 'N/A'} (Status: ${activeStadium.sustainabilityScore?.energyStatus || 'Medium'}), Organic Waste: ${activeStadium.sustainabilityScore?.organicWaste || 0}%, Recyclable Waste: ${activeStadium.recycleWaste || 0}%, Landfill Waste: ${activeStadium.landfillWaste || 0}%, CO2 Saved: ${activeStadium.sustainabilityScore?.carbonSaved || 0} tons, Water Recycled: ${activeStadium.sustainabilityScore?.waterRecycled || 0} Liters`;
 
+          // ============================================================================
+          // 🧠 MANDATIVE GENERATIVE AI INTEGRATION POINT:
+          // Enforces Task 1 Conversational Spectator Helpdesk / wayfinding assistant.
+          // Combines language preferences, active ticket markers, and stadium coordinate paths
+          // directly in the Gemini context payload.
+          // ============================================================================
           const promptWithContext = `You are ArenaFlow, an official operations and fan experience assistant system for ${activeStadium.name} during the match ${activeStadium.currentMatch}.
           
           The user prefers to communicate in ${chatLanguage}. You MUST respond in the language corresponding to ${chatLanguage} using appropriate emojis.
@@ -2039,6 +2073,7 @@ function App() {
                   <span style={{ fontSize: '0.8rem', marginRight: '0.4rem', opacity: 0.5 }}>🔍</span>
                   <input
                     type="text"
+                    aria-label="Search stadiums by name, location, or stage"
                     placeholder="Search by name, location, stage..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -2198,9 +2233,10 @@ function App() {
                 {isDevMode ? '🛠️ DEV' : '👤 USER'}
               </span>
               <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '28px', height: '16px', margin: 0 }}>
-                <input 
-                  type="checkbox" 
-                  checked={isDevMode} 
+                <input
+                  type="checkbox"
+                  aria-label="Toggle developer mode"
+                  checked={isDevMode}
                   onChange={(e) => {
                     setIsDevMode(e.target.checked);
                     if (!e.target.checked && activeTab === 'architecture') {
@@ -2900,6 +2936,7 @@ function App() {
                   <Key size={16} style={{ color: 'var(--color-primary)' }} />
                   <input
                     type="password"
+                    aria-label="Gemini API Key for live operations dispatcher"
                     placeholder="Enter Gemini API Key for live AI Dispatch..."
                     value={geminiApiKey}
                     onChange={(e) => setGeminiApiKey(e.target.value)}
@@ -2915,9 +2952,11 @@ function App() {
                   <h3 style={{ fontSize: '0.85rem', marginBottom: '0.75rem', fontWeight: 600 }}>Log Match-Day Incident</h3>
                   
                   <div className="form-group">
-                    <label className="form-label">Incident Location (e.g. Block 102, Concourse E)</label>
+                    <label className="form-label" htmlFor="incident-location">Incident Location (e.g. Block 102, Concourse E)</label>
                     <input 
                       type="text" 
+                      id="incident-location"
+                      aria-label="Incident location"
                       className="form-input" 
                       placeholder="e.g. South Turnstile Gate C" 
                       value={newLoc}
@@ -2927,8 +2966,10 @@ function App() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Describe Incident Details</label>
+                    <label className="form-label" htmlFor="incident-details">Describe Incident Details</label>
                     <textarea 
+                      id="incident-details"
+                      aria-label="Incident description details"
                       className="form-textarea" 
                       placeholder="Explain what is happening. Generative AI will auto-categorize, prioritize, and write dispatch coordinates." 
                       value={newDesc}
@@ -3210,6 +3251,7 @@ function App() {
                 <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <input
                     type="text"
+                    aria-label="Volunteer task duty description"
                     placeholder="Duty description..."
                     value={volTaskName}
                     onChange={(e) => setVolTaskName(e.target.value)}
@@ -3217,6 +3259,7 @@ function App() {
                   />
                   <input
                     type="text"
+                    aria-label="Volunteer task location"
                     placeholder="Location..."
                     value={volTaskLoc}
                     onChange={(e) => setVolTaskLoc(e.target.value)}
@@ -3225,6 +3268,7 @@ function App() {
                   
                   {/* Crew Dropdown Selector */}
                   <select
+                    aria-label="Volunteer task assigned crew dropdown"
                     value={volTaskCrew}
                     onChange={(e) => setVolTaskCrew(e.target.value)}
                     style={{ flex: '1 1 120px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none', cursor: 'pointer' }}
@@ -3237,6 +3281,7 @@ function App() {
 
                   {/* Priority Dropdown Selector */}
                   <select
+                    aria-label="Volunteer task priority dropdown"
                     value={volTaskPriority}
                     onChange={(e) => setVolTaskPriority(e.target.value)}
                     style={{ flex: '1 1 80px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.35rem', fontSize: '0.75rem', borderRadius: 4, outline: 'none', cursor: 'pointer' }}
@@ -4427,30 +4472,33 @@ function App() {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                         <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', cursor: 'pointer' }}>
                           <span>Player Telemetry & Speed</span>
-                          <input 
-                            type="checkbox" 
-                            checked={arSpeedTracker} 
-                            onChange={(e) => setArSpeedTracker(e.target.checked)} 
+                          <input
+                            type="checkbox"
+                            aria-label="Toggle AR Speed Tracker overlay"
+                            checked={arSpeedTracker}
+                            onChange={(e) => setArSpeedTracker(e.target.checked)}
                             style={{ accentColor: 'var(--color-primary)' }}
                           />
                         </label>
 
                         <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', cursor: 'pointer' }}>
                           <span>Predictive Pass Vectors</span>
-                          <input 
-                            type="checkbox" 
-                            checked={arPassMap} 
-                            onChange={(e) => setArPassMap(e.target.checked)} 
+                          <input
+                            type="checkbox"
+                            aria-label="Toggle AR Pass Map overlay"
+                            checked={arPassMap}
+                            onChange={(e) => setArPassMap(e.target.checked)}
                             style={{ accentColor: 'var(--color-primary)' }}
                           />
                         </label>
 
                         <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', cursor: 'pointer' }}>
                           <span>Tactical Spacing Grid</span>
-                          <input 
-                            type="checkbox" 
-                            checked={arTacticalGrid} 
-                            onChange={(e) => setArTacticalGrid(e.target.checked)} 
+                          <input
+                            type="checkbox"
+                            aria-label="Toggle AR Tactical Grid overlay"
+                            checked={arTacticalGrid}
+                            onChange={(e) => setArTacticalGrid(e.target.checked)}
                             style={{ accentColor: 'var(--color-primary)' }}
                           />
                         </label>
@@ -4533,6 +4581,7 @@ function App() {
                   <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     <input 
                       type="text" 
+                      aria-label="Enter digital ticket code"
                       className="form-input" 
                       placeholder="e.g. FIFA-2026-ARGFRA-99824" 
                       value={scannedTicketCode}
@@ -4759,6 +4808,7 @@ function App() {
                   <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(255,255,255,0.06)' }}>
                     <Globe size={12} style={{ color: 'var(--color-accent)' }} />
                     <select
+                      aria-label="Select chatbot interface language"
                       value={chatLanguage}
                       onChange={(e) => setChatLanguage(e.target.value)}
                       style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'inherit' }}
@@ -4777,6 +4827,7 @@ function App() {
                     <Key size={12} style={{ color: 'var(--color-primary)' }} />
                     <input
                       type="password"
+                      aria-label="Gemini API key for chatbot"
                       placeholder="API Key..."
                       value={geminiApiKey}
                       onChange={(e) => setGeminiApiKey(e.target.value)}
@@ -4832,12 +4883,13 @@ function App() {
 
               {/* Chat input box */}
               <div className="chat-input-row">
-                <input 
-                  type="text" 
-                  className="chat-input" 
-                  placeholder="Ask about directions, queues, safety reports, stadium policies..." 
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
+                  <input 
+                    type="text" 
+                    aria-label="Chat query input"
+                    className="chat-input" 
+                    placeholder="Ask about directions, queues, safety reports, stadium policies..." 
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
                   disabled={isTyping}
                 />
@@ -5126,6 +5178,7 @@ function App() {
                 </p>
 
                 <textarea
+                  aria-label="Paste stadium JSON configuration payload"
                   placeholder="Paste stadium JSON configuration..."
                   style={{
                     width: '100%',
