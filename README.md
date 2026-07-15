@@ -139,6 +139,10 @@ Make sure you have [Node.js](https://nodejs.org/) installed (v18+ recommended).
 * **Context-Aware LLM Prompts**: The assistant compiles live stadium parameters (current match, weather, stand densities, gate wait times) and injects them as structured context alongside the selected user language preference into Gemini's system instructions.
 * **Model Selection Metrics**: Evaluates and routes tasks dynamically between simple (Flash) and complex reasoning (Pro) models, demonstrating cost-to-performance optimizations.
 * **Accessibility Rerouting**: The wayfinding router checks the accessibility toggle to swap paths dynamically to alternate coordinates (`accessibilityRoute` in database), bypassing escalators and stairs.
+* **Dynamic Route Optimization (Congestion Bypass)**: If a sector (like Gate B) reports heavy congestion (89% density), a manual "Zap" optimization controller prompts the user to route via a less busy gate (Gate A at 32%), dynamically rendering alternate path vectors.
+* **Fail-Closed & Outage Resilience**: If the live Gemini API times out (8 seconds threshold via `AbortController`) or returns a quota limit error, the chat assistant falls back to a high-fidelity local keyword parser in 6 languages (EN, ES, FR, PT, AR, HI).
+* **Query Caching & Rate Protection**: Implements a client-side search query cache (`chatCache`) to prevent duplicate model invocation and reduce API costs.
+* **WCAG 2.1 AA Compliance**: Enforces keyboard accessibility (`tabIndex={0}`, Space, and Enter key selections for stadium sectors), screen-reader live regions (`aria-live="polite"`), and RTL layout direction (`dir="auto"`) for Arabic scripts.
 
 ---
 
